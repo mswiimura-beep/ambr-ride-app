@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#121a24" />
+  <title>AMBR — みんなのツーリング記録</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root{--ink:#18212b;--muted:#6f7a84;--paper:#f5f2eb;--card:#fff;--orange:#f26a2e;--orange2:#ff9c51;--navy:#121a24;--blue:#3183c8;--line:#e6e1d8;--green:#2c8a68;--shadow:0 12px 34px rgba(18,26,36,.12)}
+    *{box-sizing:border-box}html{background:#d8d5cf}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}
+    button{font:inherit} .app{max-width:720px;margin:auto;min-height:100vh;background:var(--paper);position:relative;padding-bottom:92px;box-shadow:0 0 50px rgba(20,27,35,.14)}
+    header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+    .brand{display:flex;gap:11px;align-items:center}.mark{width:39px;height:39px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:var(--orange2);font-weight:900;font-size:12px;letter-spacing:-.6px}.brand h1{font-size:19px;letter-spacing:.06em;margin:0}.brand small{display:block;color:#aeb8c3;font-size:10px;margin-top:2px;letter-spacing:.08em}.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ffb06b,#ef5f2a);display:grid;place-items:center;font-weight:800;border:2px solid rgba(255,255,255,.45)}
+    main{display:block}.view{display:none}.view.active{display:block}.section{padding:18px}.hero{background:var(--navy);color:#fff;padding:7px 20px 22px}.eyebrow{font-size:11px;color:#ffb06b;font-weight:800;letter-spacing:.12em}.hero h2{font-size:26px;line-height:1.35;margin:7px 0 7px}.hero p{margin:0;color:#b9c2cc;font-size:13px;line-height:1.65}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:-1px;padding:0 18px;transform:translateY(-12px)}.stat{background:#fff;border-radius:16px;padding:14px 10px;box-shadow:var(--shadow);text-align:center}.stat b{font-size:20px;display:block}.stat span{font-size:10px;color:var(--muted)}
+    .section-title{display:flex;justify-content:space-between;align-items:end;margin:6px 0 12px}.section-title h3{font-size:18px;margin:0}.section-title p{font-size:11px;color:var(--muted);margin:0}.pill{border:0;border-radius:999px;padding:7px 11px;background:#ece8df;color:#59636d;font-size:11px;font-weight:700}.pill.active{background:#ffe0c9;color:#b33e11}
+    .map-wrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#d9e2df}.map{height:365px}.map-controls{position:absolute;z-index:500;top:12px;left:12px;display:flex;gap:6px}.map-controls button{border:0;background:rgba(255,255,255,.94);padding:8px 10px;border-radius:10px;font-size:11px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.12)}.map-controls button.on{background:var(--navy);color:#fff}.legend{position:absolute;z-index:500;left:12px;bottom:12px;background:rgba(18,26,36,.9);color:#fff;padding:9px 11px;border-radius:12px;font-size:10px;line-height:1.9}.dotline{display:inline-block;width:18px;height:4px;border-radius:3px;margin-right:6px;vertical-align:middle}
+    .mission{margin-top:14px;background:linear-gradient(135deg,#f36b2f,#fd9952);color:#fff;border-radius:20px;padding:17px;box-shadow:var(--shadow);position:relative;overflow:hidden}.mission:after{content:"↗";position:absolute;right:12px;top:0;font-size:80px;opacity:.12;font-weight:900}.mission small{font-weight:800;letter-spacing:.08em}.mission h4{font-size:20px;margin:5px 0}.mission p{font-size:12px;margin:0 0 13px;opacity:.9}.mission button{border:0;border-radius:12px;background:#fff;color:#c94817;padding:9px 13px;font-weight:800;font-size:12px}
+    .ride-list{display:grid;gap:13px}.ride-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 7px 22px rgba(30,38,46,.08);border:1px solid rgba(20,30,40,.05)}.ride-cover{height:116px;background:linear-gradient(115deg,#263747,#59766c);position:relative;overflow:hidden}.ride-cover.one{background:linear-gradient(135deg,#364e58,#f38a49)}.ride-cover.two{background:linear-gradient(135deg,#1c435e,#71a4a2)}.route-art{position:absolute;inset:0;opacity:.9}.route-art:before{content:"";position:absolute;width:75%;height:70%;left:12%;top:12%;border:4px solid rgba(255,255,255,.87);border-left-color:transparent;border-radius:50% 45% 35% 60%;transform:rotate(-8deg)}.cover-tag{position:absolute;top:11px;left:11px;background:rgba(18,26,36,.78);color:#fff;border-radius:9px;padding:6px 9px;font-size:10px}.cover-count{position:absolute;right:11px;bottom:10px;background:rgba(255,255,255,.9);border-radius:9px;padding:6px 9px;font-size:10px;font-weight:800}.ride-body{padding:14px}.ride-body h4{font-size:16px;margin:0 0 7px}.meta{display:flex;gap:13px;color:var(--muted);font-size:11px}.members{display:flex;align-items:center;margin-top:12px}.face{width:27px;height:27px;border:2px solid #fff;border-radius:50%;background:#e98755;display:grid;place-items:center;color:#fff;font-size:10px;margin-right:-6px}.face:nth-child(2){background:#467c84}.face:nth-child(3){background:#7f6959}.members span{font-size:10px;color:var(--muted);margin-left:12px}.open-detail{float:right;border:0;background:#f1eee8;border-radius:10px;padding:7px 10px;font-weight:700;font-size:11px}
+    .feed-card{background:#fff;border-radius:18px;padding:15px;margin-bottom:13px;box-shadow:0 6px 20px rgba(20,30,40,.07)}.feed-head{display:flex;align-items:center;gap:10px}.feed-head b{font-size:13px}.feed-head small{display:block;color:var(--muted)}.photo-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:5px;margin-top:12px;height:178px}.photo{border-radius:12px;background:linear-gradient(145deg,#9dc3c0,#365265);position:relative;overflow:hidden}.photo.food{background:radial-gradient(circle at 50% 55%,#f2cb7b 0 21%,#b95f2f 22% 31%,#f4eee1 32% 36%,#91643b 37% 40%,#253440 41%)}.photo.road:after{content:"";position:absolute;width:40%;height:120%;background:#3d464b;left:30%;transform:perspective(180px) rotateX(30deg);border-left:3px solid #eee;border-right:3px solid #eee}.feed-text{font-size:13px;line-height:1.7;margin:11px 1px 3px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.chip{font-size:10px;background:#f0ede7;border-radius:999px;padding:6px 8px;color:#64707a}
+    .plan-card{background:#fff;padding:15px;border-radius:18px;margin-bottom:12px;display:flex;gap:13px;align-items:center}.datebox{width:52px;height:55px;background:#fff0e5;color:#c74b17;border-radius:13px;display:grid;place-items:center;line-height:1;text-align:center;font-weight:900}.datebox small{font-size:10px}.plan-card h4{font-size:14px;margin:0 0 5px}.plan-card p{font-size:11px;color:var(--muted);margin:0}.vote{margin-left:auto;border:0;background:var(--navy);color:#fff;border-radius:11px;padding:9px;font-size:10px}.vote.voted{background:var(--green)}
+    .fab{position:fixed;z-index:1001;right:max(calc((100vw - 720px)/2 + 18px),18px);bottom:83px;width:55px;height:55px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:28px;box-shadow:0 8px 24px rgba(216,75,20,.42)}
+    nav{position:fixed;z-index:1000;bottom:0;left:50%;transform:translateX(-50%);width:min(720px,100%);height:72px;padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);backdrop-filter:blur(14px)}nav button{border:0;background:transparent;color:#89929a;font-size:10px;font-weight:700}nav button span{display:block;font-size:21px;margin-bottom:2px}nav button.active{color:var(--orange)}
+    .modal{position:fixed;z-index:2000;inset:0;background:rgba(10,16,22,.55);display:none;align-items:end;justify-content:center}.modal.open{display:flex}.sheet{background:var(--paper);width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:25px 25px 0 0;padding:18px 18px calc(26px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px rgba(0,0,0,.22)}.handle{width:40px;height:5px;border-radius:5px;background:#c9c6bf;margin:0 auto 15px}.sheet h3{margin:0 0 6px;font-size:22px}.sheet .summary{color:var(--muted);font-size:12px}.mini-map{height:165px;background:#d5dfdc;border-radius:16px;margin:14px 0;position:relative;overflow:hidden}.mini-map:after{content:"";position:absolute;width:70%;height:50%;left:14%;top:22%;border:5px solid var(--orange);border-bottom-color:transparent;border-radius:40% 60% 45% 50%;transform:rotate(10deg)}.spot{border-left:3px solid var(--orange);padding:4px 0 4px 12px;margin:12px 0}.spot b{font-size:13px}.spot p{font-size:11px;color:var(--muted);margin:3px 0}.close{width:100%;border:0;border-radius:13px;background:var(--navy);color:#fff;padding:12px;font-weight:800;margin-top:10px}
+    .toast{position:fixed;z-index:3000;left:50%;bottom:92px;transform:translate(-50%,20px);background:#121a24;color:#fff;border-radius:12px;padding:11px 16px;font-size:12px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .welcome{position:fixed;z-index:5000;inset:0;background:#121a24;color:#fff;display:flex;justify-content:center;overflow:auto;transition:.45s ease}.welcome.leave{opacity:0;transform:scale(1.025);pointer-events:none}.welcome-inner{width:min(720px,100%);min-height:100%;padding:calc(34px + env(safe-area-inset-top)) 24px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;position:relative;overflow:hidden}.welcome-inner:before,.welcome-inner:after{content:"";position:absolute;border:3px solid rgba(242,106,46,.26);border-radius:48% 52% 38% 62%;transform:rotate(-12deg);pointer-events:none}.welcome-inner:before{width:380px;height:210px;right:-210px;top:75px}.welcome-inner:after{width:360px;height:310px;left:-250px;bottom:80px;border-color:rgba(49,131,200,.2)}.welcome-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}.welcome-mark{width:54px;height:54px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#ff9c51;font-size:15px;font-weight:900;letter-spacing:-1px}.welcome-top b{font-size:20px;letter-spacing:.08em}.welcome-top small{display:block;color:#909daa;font-size:10px;letter-spacing:.1em;margin-top:3px}.welcome-copy{margin:auto 0 20px;position:relative;z-index:1}.welcome-kicker{color:#ff9c51;font-size:11px;font-weight:900;letter-spacing:.14em}.welcome-copy h2{font-size:34px;line-height:1.35;margin:9px 0 13px;letter-spacing:.01em}.welcome-copy p{color:#bcc5ce;font-size:14px;line-height:1.8;margin:0}.welcome-points{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:27px 0 0}.welcome-point{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:13px 8px;text-align:center}.welcome-point i{font-style:normal;font-size:22px;display:block;margin-bottom:5px}.welcome-point b{font-size:11px}.join-panel{position:relative;z-index:1;background:#fff;color:#18212b;border-radius:22px;padding:17px;box-shadow:0 18px 50px rgba(0,0,0,.3)}.join-panel h3{font-size:16px;margin:0 0 5px}.join-panel p{font-size:11px;color:#75808a;line-height:1.6;margin:0 0 13px}.line-join{width:100%;border:0;border-radius:13px;background:#06c755;color:#fff;padding:14px;font-weight:900;font-size:15px;box-shadow:0 8px 18px rgba(6,199,85,.25)}.join-note{text-align:center;color:#8a949d;font-size:10px;margin:10px 0 0}.viewer-note{text-align:center;color:#bcc5ce;font-size:11px;margin:15px 0 0}.viewer-note b{color:#fff}.prototype-note{text-align:center;color:#72808d;font-size:9px;margin-top:8px}
+    .aomori-bg{position:absolute;z-index:0;width:620px;height:620px;right:-175px;top:47%;transform:translateY(-50%) rotate(-7deg);opacity:.86;pointer-events:none;filter:drop-shadow(0 22px 28px rgba(0,0,0,.2))}.aomori-land{fill:rgba(255,255,255,.028);stroke:rgba(255,255,255,.11);stroke-width:2}.aomori-coast{fill:none;stroke:rgba(242,106,46,.42);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.aomori-route{fill:none;stroke:rgba(255,156,81,.52);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:2 11}.aomori-route.blue{stroke:rgba(49,131,200,.46);stroke-width:2.5;stroke-dasharray:10 9}.aomori-dot{fill:#ff9c51;filter:drop-shadow(0 0 5px rgba(255,156,81,.8))}.map-label{fill:rgba(255,255,255,.23);font-size:11px;font-weight:800;letter-spacing:.18em}.welcome-inner:before{border-width:1px;border-color:rgba(255,255,255,.05);border-radius:50%;transform:none;width:520px;height:520px;right:-230px;top:80px}.welcome-inner:after{border-width:1px;border-color:rgba(49,131,200,.18);border-radius:50%;transform:none;width:350px;height:350px;left:-250px;bottom:70px}.welcome-copy h2{text-shadow:0 3px 18px rgba(18,26,36,.8)}.welcome-copy p{text-shadow:0 2px 12px #121a24}.welcome-point{background:rgba(18,26,36,.58);border-color:rgba(255,255,255,.09);backdrop-filter:blur(4px)}.viewer-note,.prototype-note{position:relative;z-index:1}
+    @media(min-width:700px){.map{height:430px}.ride-list{grid-template-columns:1fr 1fr}.hero h2{font-size:31px}.aomori-bg{right:-95px;width:670px;height:670px}}
+  </style>
+</head>
+<body>
+<section id="welcome" class="welcome" aria-label="AMBR参加画面">
+  <div class="welcome-inner">
+    <svg class="aomori-bg" viewBox="0 0 520 560" aria-hidden="true">
+      <path class="aomori-land" fill-rule="evenodd" d="M78 93 L109 42 L145 27 L176 43 L185 92 L176 133 L202 176 L224 149 L233 105 L224 72 L253 56 L278 72 L286 113 L307 160 L329 144 L344 106 L365 66 L401 44 L447 48 L475 77 L469 108 L435 132 L401 148 L377 187 L358 235 L373 281 L405 336 L389 390 L352 418 L300 417 L262 444 L224 474 L174 461 L132 478 L98 445 L88 396 L63 348 L73 301 L61 254 L72 210 L57 161 Z M205 130 C220 103 244 91 263 103 C280 115 283 142 294 164 C277 172 252 184 234 194 C224 171 216 150 205 130 Z"/>
+      <path class="aomori-coast" d="M78 93 L109 42 L145 27 L176 43 L185 92 L176 133 L202 176 L224 149 M233 105 L224 72 L253 56 L278 72 L286 113 L307 160 L329 144 L344 106 L365 66 L401 44 L447 48 L475 77 L469 108 L435 132 L401 148 L377 187 L358 235 L373 281 L405 336 L389 390 L352 418 L300 417 L262 444 L224 474 L174 461 L132 478 L98 445 L88 396 L63 348 L73 301 L61 254 L72 210 L57 161 Z"/>
+      <path class="aomori-coast" d="M202 176 C221 151 224 119 243 103 C260 89 278 109 286 137 C291 154 301 164 307 160"/>
+      <path class="aomori-route" d="M115 357 C145 333 175 306 204 277 S264 236 303 245 S350 288 371 334"/>
+      <path class="aomori-route blue" d="M203 278 C183 234 171 194 175 137 M304 244 C337 217 351 169 375 113 S424 79 458 81"/>
+      <circle class="aomori-dot" cx="115" cy="357" r="5"/><circle class="aomori-dot" cx="204" cy="277" r="4"/><circle class="aomori-dot" cx="303" cy="245" r="4"/>
+      <text class="map-label" x="110" y="510">AOMORI</text>
+    </svg>
+    <div class="welcome-top"><div class="welcome-mark">AMBR</div><div><b>AMBR</b><small>AOMORI MEGURU BIKE ROOM</small></div></div>
+    <div class="welcome-copy">
+      <div class="welcome-kicker">WELCOME TO OUR RIDE</div>
+      <h2>AMBRアプリへ<br>ようこそ。</h2>
+      <p>仲間と走った道、出会った景色、うまかった飯。<br>みんなの思い出と情報を、ここに残します。</p>
+      <div class="welcome-points"><div class="welcome-point"><i>⌖</i><b>ルートを見る</b></div><div class="welcome-point"><i>▦</i><b>思い出を見る</b></div><div class="welcome-point"><i>◎</i><b>次の目標</b></div></div>
+    </div>
+    <div class="join-panel">
+      <h3>AMBRメンバーとして参加</h3>
+      <p>LINEの名前と画像を使うので、メールアドレスやパスワードの入力はありません。</p>
+      <button class="line-join" onclick="joinAmbr()">LINEでAMBRに参加する</button>
+      <div class="join-note">参加後も、見るだけで大丈夫です</div>
+    </div>
+    <p class="viewer-note"><b>見る専も大歓迎。</b> 投稿はいつでも、気が向いたときに。</p>
+    <div class="prototype-note">試作版のため、現在LINEアカウントには接続しません</div>
+  </div>
+</section>
+<div class="app">
+  <header>
+    <div class="brand"><div class="mark">AMBR</div><div><h1>AMBR</h1><small>AOMORI MEGURU BIKE ROOM</small></div></div>
+    <div class="avatar">健</div>
+  </header>
+  <main>
+    <section id="mapView" class="view active">
+      <div class="hero"><div class="eyebrow">みんなの走行マップ</div><h2>走った道を残して、<br>まだ見ぬ青森へ。</h2><p>AMBRの仲間が走ったルートと、次に行きたい場所。</p></div>
+      <div class="stats"><div class="stat"><b>38%</b><span>青森県走破率</span></div><div class="stat"><b>1,284</b><span>みんなの走行 km</span></div><div class="stat"><b>17</b><span>訪問した市町村</span></div></div>
+      <div class="section" style="padding-top:5px">
+        <div class="section-title"><div><h3>AMBR走行マップ</h3><p>濃い道ほど、よく走っています</p></div><button class="pill" onclick="fitAomori()">全体表示</button></div>
+        <div class="map-wrap">
+          <div id="map" class="map"></div>
+          <div class="map-controls"><button id="doneBtn" class="on" onclick="toggleLayer('done')">走った道</button><button id="wantBtn" class="on" onclick="toggleLayer('want')">行きたい道</button></div>
+          <div class="legend"><div><i class="dotline" style="background:#f26a2e"></i>よく走る道</div><div><i class="dotline" style="background:#ffb278"></i>走った道</div><div><i class="dotline" style="background:#3183c8"></i>次の候補</div></div>
+        </div>
+        <div class="mission"><small>NEXT MISSION</small><h4>下北半島を開拓しよう</h4><p>AMBR未走行エリア。大間崎まで約245kmの候補ルートです。</p><button onclick="showToast('行きたい！に登録しました')">行きたい！ 12人</button></div>
+      </div>
+    </section>
+
+    <section id="ridesView" class="view"><div class="section"><div class="section-title"><div><h3>ツーリング記録</h3><p>ルート・写真・飯情報をひとつに</p></div><button class="pill active">新しい順</button></div>
+      <div class="ride-list">
+        <article class="ride-card"><div class="ride-cover one"><div class="route-art"></div><span class="cover-tag">7月13日</span><span class="cover-count">写真 24枚</span></div><div class="ride-body"><button class="open-detail" onclick="openRide()">見る</button><h4>虹の湖・西目屋ぐるっとツーリング</h4><div class="meta"><span>🏍 138.9km</span><span>⏱ 3時間17分</span></div><div class="members"><i class="face">健</i><i class="face">忍</i><i class="face">彰</i><span>ほか4人</span></div></div></article>
+        <article class="ride-card"><div class="ride-cover two"><div class="route-art"></div><span class="cover-tag">6月28日</span><span class="cover-count">写真 18枚</span></div><div class="ride-body"><button class="open-detail" onclick="openRide()">見る</button><h4>夏泊半島ホタテツーリング</h4><div class="meta"><span>🏍 96.2km</span><span>⏱ 2時間45分</span></div><div class="members"><i class="face">健</i><i class="face">誠</i><i class="face">亮</i><span>6人で走行</span></div></div></article>
+      </div>
+    </div></section>
+
+    <section id="feedView" class="view"><div class="section"><div class="section-title"><div><h3>みんなの思い出</h3><p>流れずに、地図と一緒に残ります</p></div><button class="pill">地域で絞る</button></div>
+      <article class="feed-card"><div class="feed-head"><div class="face" style="margin:0;width:36px;height:36px">忍</div><div><b>忍さんが写真を追加</b><small>虹の湖・西目屋ツーリング · 2時間前</small></div></div><div class="photo-grid"><div class="photo road"></div><div class="photo food"></div></div><p class="feed-text">津軽ダムのあとは西目屋で暗門そば。バイクを店の前に停めやすかったです。</p><div class="chips"><span class="chip">#飯情報</span><span class="chip">#駐車しやすい</span><span class="chip">#西目屋</span></div></article>
+      <article class="feed-card"><div class="feed-head"><div class="face" style="margin:0;width:36px;height:36px;background:#467c84">誠</div><div><b>誠さんが道路情報を追加</b><small>国道102号 · 昨日</small></div></div><p class="feed-text">虹の湖から十和田方面、一部に砂が浮いていました。カーブ手前は少し注意。</p><div class="chips"><span class="chip">#道路情報</span><span class="chip">#安全</span></div></article>
+    </div></section>
+
+    <section id="planView" class="view"><div class="section"><div class="section-title"><div><h3>次はどこへ行く？</h3><p>未走行エリアからみんなで決める</p></div><button class="pill">＋ 候補を追加</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>01</div><div><h4>大間崎・下北半島</h4><p>未走行率 82% · 12人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>02</div><div><h4>龍飛崎・竜泊ライン</h4><p>未走行率 46% · 9人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>03</div><div><h4>十和田湖・奥入瀬</h4><p>未走行率 21% · 7人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="mission" style="background:linear-gradient(135deg,#23394a,#33758a)"><small>AMBR CHALLENGE</small><h4>道の駅制覇 12 / 28</h4><p>次は「道の駅よこはま」で13個目。みんなの記録が達成率に加わります。</p><button onclick="showToast('道の駅一覧を開きました')" style="color:#265366">進み具合を見る</button></div>
+    </div></section>
+  </main>
+  <button class="fab" aria-label="ツーリング記録を追加" onclick="showToast('新しいツーリングを作成します')">＋</button>
+  <nav><button class="active" data-view="mapView"><span>⌖</span>マップ</button><button data-view="ridesView"><span>🏍</span>記録</button><button data-view="feedView"><span>▦</span>思い出</button><button data-view="planView"><span>◎</span>次の目標</button></nav>
+</div>
+
+<div id="rideModal" class="modal" onclick="if(event.target===this)closeRide()"><div class="sheet"><div class="handle"></div><h3>虹の湖・西目屋ぐるっとツーリング</h3><div class="summary">2026年7月13日 · 7人 · 138.9km · 写真24枚</div><div class="mini-map"></div><div class="spot"><b>📍 道の駅 虹の湖</b><p>集合写真 7枚 · 「朝は駐車場が空いていました」</p></div><div class="spot"><b>🍜 西目屋・暗門そば</b><p>飯写真 5枚 · バイク駐車しやすい</p></div><div class="spot"><b>📷 津軽ダム展望所</b><p>景色の写真 12枚 · みんなのコメント</p></div><button class="close" onclick="closeRide()">閉じる</button></div></div>
+<div id="toast" class="toast">完了しました</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const views=[...document.querySelectorAll('.view')], navs=[...document.querySelectorAll('nav button')];
+  navs.forEach(b=>b.addEventListener('click',()=>{views.forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));navs.forEach(n=>n.classList.toggle('active',n===b));window.scrollTo({top:0,behavior:'smooth'});if(b.dataset.view==='mapView'&&window.map)setTimeout(()=>map.invalidateSize(),80)}));
+  let map,doneGroup,wantGroup;
+  const doneRoutes=[
+    {w:9,c:'#f26a2e',p:[[40.824,140.74],[40.697,140.75],[40.62,140.66],[40.58,140.56],[40.52,140.43],[40.58,140.30]]},
+    {w:7,c:'#ff985b',p:[[40.824,140.74],[40.93,140.73],[41.02,140.82],[40.95,140.97],[40.87,140.96]]},
+    {w:6,c:'#ffb278',p:[[40.824,140.74],[40.85,140.50],[40.81,140.31],[40.78,140.20]]},
+    {w:8,c:'#f26a2e',p:[[40.824,140.74],[40.72,140.68],[40.60,140.58],[40.46,140.55],[40.39,140.57]]},
+    {w:5,c:'#ffb278',p:[[40.824,140.74],[40.80,140.93],[40.86,141.13],[40.93,141.17]]}
+  ];
+  const wantRoutes=[{p:[[40.93,141.17],[41.15,141.22],[41.31,141.20],[41.53,140.91]]},{p:[[40.81,140.31],[41.05,140.34],[41.26,140.34]]}];
+  function initMap(){if(!window.L)return;map=L.map('map',{zoomControl:false,attributionControl:true}).setView([40.87,140.74],8);L.control.zoom({position:'bottomright'}).addTo(map);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);doneGroup=L.layerGroup().addTo(map);wantGroup=L.layerGroup().addTo(map);doneRoutes.forEach(r=>L.polyline(r.p,{color:r.c,weight:r.w,opacity:.86,lineCap:'round'}).addTo(doneGroup));wantRoutes.forEach(r=>L.polyline(r.p,{color:'#3183c8',weight:5,dashArray:'9 9',opacity:.9}).addTo(wantGroup));[['弘前','40.603,140.464'],['夏泊','40.926,141.018'],['西目屋','40.576,140.296'],['未走行：大間','41.526,140.908']].forEach(([n,c])=>{let [a,b]=c.split(',').map(Number);L.marker([a,b]).bindPopup('<b>'+n+'</b><br>AMBRスポット').addTo(map)});}
+  function fitAomori(){map&&map.fitBounds([[40.25,139.85],[41.58,141.45]],{padding:[18,18]})}
+  function toggleLayer(k){const g=k==='done'?doneGroup:wantGroup,btn=document.getElementById(k==='done'?'doneBtn':'wantBtn');if(map.hasLayer(g)){map.removeLayer(g);btn.classList.remove('on')}else{map.addLayer(g);btn.classList.add('on')}}
+  function openRide(){document.getElementById('rideModal').classList.add('open')}function closeRide(){document.getElementById('rideModal').classList.remove('open')}
+  function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1900)}
+  function vote(b){b.classList.toggle('voted');b.textContent=b.classList.contains('voted')?'投票済み':'投票';showToast(b.classList.contains('voted')?'投票しました':'投票を取り消しました')}
+  function joinAmbr(){const w=document.getElementById('welcome');w.classList.add('leave');setTimeout(()=>{w.style.display='none';showToast('AMBRへようこそ！')},450)}
+  initMap();
+</script>
+</body>
+</html>
