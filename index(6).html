@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#121a24" />
+  <title>AMBR — みんなのツーリング記録</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root{--ink:#18212b;--muted:#6f7a84;--paper:#f5f2eb;--card:#fff;--orange:#f26a2e;--orange2:#ff9c51;--navy:#121a24;--blue:#3183c8;--line:#e6e1d8;--green:#2c8a68;--shadow:0 12px 34px rgba(18,26,36,.12)}
+    *{box-sizing:border-box}html{background:#d8d5cf}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}
+    button{font:inherit} .app{max-width:720px;margin:auto;min-height:100vh;background:var(--paper);position:relative;padding-bottom:92px;box-shadow:0 0 50px rgba(20,27,35,.14)}
+    header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+    .brand{display:flex;gap:11px;align-items:center}.mark{width:39px;height:39px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:var(--orange2);font-weight:900;font-size:12px;letter-spacing:-.6px}.brand h1{font-size:19px;letter-spacing:.06em;margin:0}.brand small{display:block;color:#aeb8c3;font-size:10px;margin-top:2px;letter-spacing:.08em}.avatar{width:38px;height:38px;padding:0;border-radius:50%;background:linear-gradient(135deg,#ffb06b,#ef5f2a);color:#fff;display:grid;place-items:center;font-weight:800;border:2px solid rgba(255,255,255,.45);overflow:hidden;cursor:pointer}.avatar img{width:100%;height:100%;object-fit:cover}
+    main{display:block}.view{display:none}.view.active{display:block}.section{padding:18px}.hero{background:var(--navy);color:#fff;padding:7px 20px 22px}.eyebrow{font-size:11px;color:#ffb06b;font-weight:800;letter-spacing:.12em}.hero h2{font-size:26px;line-height:1.35;margin:7px 0 7px}.hero p{margin:0;color:#b9c2cc;font-size:13px;line-height:1.65}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:-1px;padding:0 18px;transform:translateY(-12px)}.stat{background:#fff;border-radius:16px;padding:14px 10px;box-shadow:var(--shadow);text-align:center}.stat b{font-size:20px;display:block}.stat span{font-size:10px;color:var(--muted)}
+    .section-title{display:flex;justify-content:space-between;align-items:end;margin:6px 0 12px}.section-title h3{font-size:18px;margin:0}.section-title p{font-size:11px;color:var(--muted);margin:0}.pill{border:0;border-radius:999px;padding:7px 11px;background:#ece8df;color:#59636d;font-size:11px;font-weight:700}.pill.active{background:#ffe0c9;color:#b33e11}
+    .map-wrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#d9e2df}.map{height:365px}.map-controls{position:absolute;z-index:500;top:12px;left:12px;display:flex;gap:6px}.map-controls button{border:0;background:rgba(255,255,255,.94);padding:8px 10px;border-radius:10px;font-size:11px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.12)}.map-controls button.on{background:var(--navy);color:#fff}.legend{position:absolute;z-index:500;left:12px;bottom:12px;background:rgba(18,26,36,.9);color:#fff;padding:9px 11px;border-radius:12px;font-size:10px;line-height:1.9}.dotline{display:inline-block;width:18px;height:4px;border-radius:3px;margin-right:6px;vertical-align:middle}
+    .mission{margin-top:14px;background:linear-gradient(135deg,#f36b2f,#fd9952);color:#fff;border-radius:20px;padding:17px;box-shadow:var(--shadow);position:relative;overflow:hidden}.mission:after{content:"↗";position:absolute;right:12px;top:0;font-size:80px;opacity:.12;font-weight:900}.mission small{font-weight:800;letter-spacing:.08em}.mission h4{font-size:20px;margin:5px 0}.mission p{font-size:12px;margin:0 0 13px;opacity:.9}.mission button{border:0;border-radius:12px;background:#fff;color:#c94817;padding:9px 13px;font-weight:800;font-size:12px}
+    .ride-list{display:grid;gap:13px}.ride-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 7px 22px rgba(30,38,46,.08);border:1px solid rgba(20,30,40,.05)}.ride-cover{height:116px;background:linear-gradient(115deg,#263747,#59766c);position:relative;overflow:hidden}.ride-cover.one{background:linear-gradient(135deg,#364e58,#f38a49)}.ride-cover.two{background:linear-gradient(135deg,#1c435e,#71a4a2)}.route-art{position:absolute;inset:0;opacity:.9}.route-art:before{content:"";position:absolute;width:75%;height:70%;left:12%;top:12%;border:4px solid rgba(255,255,255,.87);border-left-color:transparent;border-radius:50% 45% 35% 60%;transform:rotate(-8deg)}.cover-tag{position:absolute;top:11px;left:11px;background:rgba(18,26,36,.78);color:#fff;border-radius:9px;padding:6px 9px;font-size:10px}.cover-count{position:absolute;right:11px;bottom:10px;background:rgba(255,255,255,.9);border-radius:9px;padding:6px 9px;font-size:10px;font-weight:800}.ride-body{padding:14px}.ride-body h4{font-size:16px;margin:0 0 7px}.meta{display:flex;gap:13px;color:var(--muted);font-size:11px}.members{display:flex;align-items:center;margin-top:12px}.face{width:27px;height:27px;border:2px solid #fff;border-radius:50%;background:#e98755;display:grid;place-items:center;color:#fff;font-size:10px;margin-right:-6px}.face:nth-child(2){background:#467c84}.face:nth-child(3){background:#7f6959}.members span{font-size:10px;color:var(--muted);margin-left:12px}.open-detail{float:right;border:0;background:#f1eee8;border-radius:10px;padding:7px 10px;font-weight:700;font-size:11px}
+    .feed-card{background:#fff;border-radius:18px;padding:15px;margin-bottom:13px;box-shadow:0 6px 20px rgba(20,30,40,.07)}.feed-head{display:flex;align-items:center;gap:10px}.feed-head b{font-size:13px}.feed-head small{display:block;color:var(--muted)}.photo-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:5px;margin-top:12px;height:178px}.photo{border-radius:12px;background:linear-gradient(145deg,#9dc3c0,#365265);position:relative;overflow:hidden}.photo.food{background:radial-gradient(circle at 50% 55%,#f2cb7b 0 21%,#b95f2f 22% 31%,#f4eee1 32% 36%,#91643b 37% 40%,#253440 41%)}.photo.road:after{content:"";position:absolute;width:40%;height:120%;background:#3d464b;left:30%;transform:perspective(180px) rotateX(30deg);border-left:3px solid #eee;border-right:3px solid #eee}.feed-text{font-size:13px;line-height:1.7;margin:11px 1px 3px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.chip{font-size:10px;background:#f0ede7;border-radius:999px;padding:6px 8px;color:#64707a}
+    .plan-card{background:#fff;padding:15px;border-radius:18px;margin-bottom:12px;display:flex;gap:13px;align-items:center}.datebox{width:52px;height:55px;background:#fff0e5;color:#c74b17;border-radius:13px;display:grid;place-items:center;line-height:1;text-align:center;font-weight:900}.datebox small{font-size:10px}.plan-card h4{font-size:14px;margin:0 0 5px}.plan-card p{font-size:11px;color:var(--muted);margin:0}.vote{margin-left:auto;border:0;background:var(--navy);color:#fff;border-radius:11px;padding:9px;font-size:10px}.vote.voted{background:var(--green)}
+    .fab{position:fixed;z-index:1001;right:max(calc((100vw - 720px)/2 + 18px),18px);bottom:83px;width:55px;height:55px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:28px;box-shadow:0 8px 24px rgba(216,75,20,.42)}
+    nav{position:fixed;z-index:1000;bottom:0;left:50%;transform:translateX(-50%);width:min(720px,100%);height:72px;padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);backdrop-filter:blur(14px)}nav button{border:0;background:transparent;color:#89929a;font-size:9px;font-weight:700;padding:0 2px}nav button span{display:block;font-size:20px;margin-bottom:2px}nav button.active{color:var(--orange)}
+    .trails-hero{background:linear-gradient(155deg,#121a24 0%,#1e3444 100%);color:#fff;padding:18px 20px 26px;position:relative;overflow:hidden}.trails-hero:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(255,255,255,.09);border-radius:50%;right:-80px;top:-90px}.trails-hero .eyebrow{position:relative;z-index:1}.trails-hero h2{font-size:27px;line-height:1.35;margin:7px 0}.trails-hero p{font-size:12px;line-height:1.7;color:#bec8d1;margin:0;max-width:430px}.gpx-actions{display:flex;gap:8px;margin-top:15px;position:relative;z-index:1}.gpx-upload,.play-all{border:0;border-radius:12px;padding:11px 13px;font-weight:900;font-size:12px}.gpx-upload{background:var(--orange);color:#fff}.play-all{background:rgba(255,255,255,.11);color:#fff;border:1px solid rgba(255,255,255,.14)}.play-all.playing{background:#fff;color:var(--navy)}
+    .trail-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:-13px;position:relative;z-index:2}.trail-stat{background:#fff;border-radius:17px;padding:14px;box-shadow:var(--shadow)}.trail-stat small{display:block;color:var(--muted);font-size:10px}.trail-stat strong{display:block;font-size:23px;margin:3px 0}.trail-stat .bar{height:6px;background:#eeeae3;border-radius:8px;overflow:hidden;margin-top:8px}.trail-stat .bar i{display:block;height:100%;border-radius:8px}.west i{background:var(--orange)}.east i{background:var(--blue)}
+    .comparison-picker{background:#fff;border-radius:17px;padding:13px 14px;margin-top:-13px;position:relative;z-index:3;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}.comparison-picker label{font-size:10px;color:var(--muted);font-weight:800}.comparison-picker select{flex:1;border:0;background:#f1eee8;border-radius:11px;padding:10px;color:var(--ink);font-weight:900;font-size:12px}.trail-stats.dynamic{grid-template-columns:repeat(auto-fit,minmax(135px,1fr));margin-top:10px}.trail-stat[data-color="orange"] .bar i{background:var(--orange)}.trail-stat[data-color="blue"] .bar i{background:var(--blue)}.trail-stat[data-color="green"] .bar i{background:var(--green)}
+    .trail-map-wrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#dbe4e1}.trail-map{height:400px}.trail-map-tools{position:absolute;z-index:500;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start}.trail-map-tools .badge{background:rgba(18,26,36,.9);color:#fff;border-radius:11px;padding:8px 10px;font-size:10px;line-height:1.6}.trail-map-tools button{border:0;background:rgba(255,255,255,.95);border-radius:10px;padding:9px 10px;font-size:10px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.12)}.trail-legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 2px 0;color:var(--muted);font-size:10px}.trail-legend i{display:inline-block;width:18px;height:4px;border-radius:3px;margin-right:5px;vertical-align:middle}.insight-card{background:#fff;border-radius:18px;padding:15px;margin-top:14px;box-shadow:0 6px 20px rgba(20,30,40,.07)}.insight-card h4{font-size:15px;margin:0 0 7px}.insight-card p{font-size:12px;color:var(--muted);line-height:1.7;margin:0}.insight-card b{color:var(--ink)}.unridden-card{display:flex;gap:12px;align-items:center;background:#e9f3f8;border:1px solid #d2e8f2;border-radius:17px;padding:14px;margin-top:12px}.unridden-icon{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:20px}.unridden-card h4{font-size:13px;margin:0 0 4px}.unridden-card p{font-size:10px;color:#59717e;margin:0}.unridden-card button{margin-left:auto;border:0;background:#fff;color:#2a678a;border-radius:10px;padding:8px;font-size:10px;font-weight:800}.trail-flow{stroke-dasharray:4 13!important;stroke-linecap:round;animation:trailFlow 1.15s linear infinite;animation-play-state:paused}.trails-playing .trail-flow{animation-play-state:running}@keyframes trailFlow{to{stroke-dashoffset:-34}}.leaflet-tooltip.trail-tip{background:#121a24;color:#fff;border:0;border-radius:8px;box-shadow:none;font-size:9px;padding:5px 7px}.leaflet-tooltip.trail-tip:before{display:none}
+    .modal{position:fixed;z-index:2000;inset:0;background:rgba(10,16,22,.55);display:none;align-items:end;justify-content:center}.modal.open{display:flex}.sheet{background:var(--paper);width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:25px 25px 0 0;padding:18px 18px calc(26px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px rgba(0,0,0,.22)}.handle{width:40px;height:5px;border-radius:5px;background:#c9c6bf;margin:0 auto 15px}.sheet h3{margin:0 0 6px;font-size:22px}.sheet .summary{color:var(--muted);font-size:12px}.mini-map{height:165px;background:#d5dfdc;border-radius:16px;margin:14px 0;position:relative;overflow:hidden}.mini-map:after{content:"";position:absolute;width:70%;height:50%;left:14%;top:22%;border:5px solid var(--orange);border-bottom-color:transparent;border-radius:40% 60% 45% 50%;transform:rotate(10deg)}.spot{border-left:3px solid var(--orange);padding:4px 0 4px 12px;margin:12px 0}.spot b{font-size:13px}.spot p{font-size:11px;color:var(--muted);margin:3px 0}.close{width:100%;border:0;border-radius:13px;background:var(--navy);color:#fff;padding:12px;font-weight:800;margin-top:10px}
+    .toast{position:fixed;z-index:3000;left:50%;bottom:92px;transform:translate(-50%,20px);background:#121a24;color:#fff;border-radius:12px;padding:11px 16px;font-size:12px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .welcome{position:fixed;z-index:5000;inset:0;background:#121a24;color:#fff;display:flex;justify-content:center;overflow:auto;transition:.45s ease}.welcome.leave{opacity:0;transform:scale(1.025);pointer-events:none}.welcome-inner{width:min(720px,100%);min-height:100%;padding:calc(34px + env(safe-area-inset-top)) 24px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;position:relative;overflow:hidden}.welcome-inner:before,.welcome-inner:after{content:"";position:absolute;border:3px solid rgba(242,106,46,.26);border-radius:48% 52% 38% 62%;transform:rotate(-12deg);pointer-events:none}.welcome-inner:before{width:380px;height:210px;right:-210px;top:75px}.welcome-inner:after{width:360px;height:310px;left:-250px;bottom:80px;border-color:rgba(49,131,200,.2)}.welcome-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}.welcome-mark{width:54px;height:54px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#ff9c51;font-size:15px;font-weight:900;letter-spacing:-1px}.welcome-top b{font-size:20px;letter-spacing:.08em}.welcome-top small{display:block;color:#909daa;font-size:10px;letter-spacing:.1em;margin-top:3px}.welcome-copy{margin:auto 0 20px;position:relative;z-index:1}.welcome-kicker{color:#ff9c51;font-size:11px;font-weight:900;letter-spacing:.14em}.welcome-copy h2{font-size:34px;line-height:1.35;margin:9px 0 13px;letter-spacing:.01em}.welcome-copy p{color:#bcc5ce;font-size:14px;line-height:1.8;margin:0}.welcome-points{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:27px 0 0}.welcome-point{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:13px 8px;text-align:center}.welcome-point i{font-style:normal;font-size:22px;display:block;margin-bottom:5px}.welcome-point b{font-size:11px}.join-panel{position:relative;z-index:1;background:#fff;color:#18212b;border-radius:22px;padding:17px;box-shadow:0 18px 50px rgba(0,0,0,.3)}.join-panel h3{font-size:16px;margin:0 0 5px}.join-panel p{font-size:11px;color:#75808a;line-height:1.6;margin:0 0 13px}.line-join{width:100%;border:0;border-radius:13px;background:#06c755;color:#fff;padding:14px;font-weight:900;font-size:15px;box-shadow:0 8px 18px rgba(6,199,85,.25)}.viewer-join{width:100%;border:0;background:transparent;color:#6f7a84;padding:11px 8px 4px;font-size:12px;font-weight:800}.join-note{text-align:center;color:#8a949d;font-size:10px;margin:10px 0 0}.saved-profile{display:none;align-items:center;gap:10px;background:#f3f0ea;border-radius:13px;padding:9px;margin-bottom:10px}.saved-profile.show{display:flex}.saved-profile img{width:40px;height:40px;border-radius:50%;object-fit:cover}.saved-profile b{font-size:13px}.saved-profile small{display:block;color:#7a858f;font-size:9px;margin-top:2px}.saved-profile button{margin-left:auto;border:0;background:#fff;border-radius:9px;padding:7px;font-size:9px;color:#59636d}.viewer-note{text-align:center;color:#bcc5ce;font-size:11px;margin:15px 0 0}.viewer-note b{color:#fff}.prototype-note{text-align:center;color:#72808d;font-size:9px;margin-top:8px}
+    .profile-modal{z-index:6500}.profile-sheet{background:#f5f2eb;width:min(720px,100%);border-radius:25px 25px 0 0;padding:18px 20px calc(25px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px rgba(0,0,0,.3)}.profile-sheet h3{margin:0;font-size:21px}.profile-sheet>p{font-size:11px;color:#6f7a84;line-height:1.7;margin:6px 0 15px}.profile-form{display:flex;gap:14px;align-items:center;margin:13px 0 17px}.avatar-picker{width:82px;height:82px;border-radius:50%;background:#e5e0d7;border:2px dashed #b4aea4;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;color:#80796f;font-size:10px;text-align:center;position:relative}.avatar-picker img{width:100%;height:100%;object-fit:cover;display:none}.avatar-picker.has-image img{display:block}.avatar-picker.has-image span{display:none}.avatar-picker input{position:absolute;inset:0;opacity:0}.profile-fields{flex:1}.profile-fields label{display:block;font-size:10px;color:#6f7a84;font-weight:800;margin-bottom:5px}.profile-fields input{width:100%;border:1px solid #ded8ce;border-radius:12px;background:#fff;padding:12px;font-size:15px}.privacy-box{background:#eaf4f8;border-radius:13px;padding:11px;color:#476879;font-size:10px;line-height:1.6;margin-bottom:14px}.profile-save{width:100%;border:0;border-radius:13px;background:#06c755;color:#fff;padding:14px;font-weight:900;font-size:14px}.profile-cancel{width:100%;border:0;background:transparent;color:#7a858f;padding:12px 8px 4px;font-size:11px}
+    .aomori-bg{position:absolute;z-index:0;width:620px;height:620px;right:-175px;top:47%;transform:translateY(-50%) rotate(-7deg);opacity:.86;pointer-events:none;filter:drop-shadow(0 22px 28px rgba(0,0,0,.2))}.aomori-land{fill:rgba(255,255,255,.028);stroke:rgba(255,255,255,.11);stroke-width:2}.aomori-coast{fill:none;stroke:rgba(242,106,46,.42);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.aomori-route{fill:none;stroke:rgba(255,156,81,.52);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:2 11}.aomori-route.blue{stroke:rgba(49,131,200,.46);stroke-width:2.5;stroke-dasharray:10 9}.aomori-dot{fill:#ff9c51;filter:drop-shadow(0 0 5px rgba(255,156,81,.8))}.map-label{fill:rgba(255,255,255,.23);font-size:11px;font-weight:800;letter-spacing:.18em}.welcome-inner:before{border-width:1px;border-color:rgba(255,255,255,.05);border-radius:50%;transform:none;width:520px;height:520px;right:-230px;top:80px}.welcome-inner:after{border-width:1px;border-color:rgba(49,131,200,.18);border-radius:50%;transform:none;width:350px;height:350px;left:-250px;bottom:70px}.welcome-copy h2{text-shadow:0 3px 18px rgba(18,26,36,.8)}.welcome-copy p{text-shadow:0 2px 12px #121a24}.welcome-point{background:rgba(18,26,36,.58);border-color:rgba(255,255,255,.09);backdrop-filter:blur(4px)}.viewer-note,.prototype-note{position:relative;z-index:1}
+    @media(min-width:700px){.map{height:430px}.ride-list{grid-template-columns:1fr 1fr}.hero h2{font-size:31px}.aomori-bg{right:-95px;width:670px;height:670px}}
+  </style>
+</head>
+<body>
+<section id="welcome" class="welcome" aria-label="AMBR参加画面">
+  <div class="welcome-inner">
+    <svg class="aomori-bg" viewBox="0 0 520 560" aria-hidden="true">
+      <path class="aomori-land" fill-rule="evenodd" d="M78 93 L109 42 L145 27 L176 43 L185 92 L176 133 L202 176 L224 149 L233 105 L224 72 L253 56 L278 72 L286 113 L307 160 L329 144 L344 106 L365 66 L401 44 L447 48 L475 77 L469 108 L435 132 L401 148 L377 187 L358 235 L373 281 L405 336 L389 390 L352 418 L300 417 L262 444 L224 474 L174 461 L132 478 L98 445 L88 396 L63 348 L73 301 L61 254 L72 210 L57 161 Z M205 130 C220 103 244 91 263 103 C280 115 283 142 294 164 C277 172 252 184 234 194 C224 171 216 150 205 130 Z"/>
+      <path class="aomori-coast" d="M78 93 L109 42 L145 27 L176 43 L185 92 L176 133 L202 176 L224 149 M233 105 L224 72 L253 56 L278 72 L286 113 L307 160 L329 144 L344 106 L365 66 L401 44 L447 48 L475 77 L469 108 L435 132 L401 148 L377 187 L358 235 L373 281 L405 336 L389 390 L352 418 L300 417 L262 444 L224 474 L174 461 L132 478 L98 445 L88 396 L63 348 L73 301 L61 254 L72 210 L57 161 Z"/>
+      <path class="aomori-coast" d="M202 176 C221 151 224 119 243 103 C260 89 278 109 286 137 C291 154 301 164 307 160"/>
+      <path class="aomori-route" d="M115 357 C145 333 175 306 204 277 S264 236 303 245 S350 288 371 334"/>
+      <path class="aomori-route blue" d="M203 278 C183 234 171 194 175 137 M304 244 C337 217 351 169 375 113 S424 79 458 81"/>
+      <circle class="aomori-dot" cx="115" cy="357" r="5"/><circle class="aomori-dot" cx="204" cy="277" r="4"/><circle class="aomori-dot" cx="303" cy="245" r="4"/>
+      <text class="map-label" x="110" y="510">AOMORI</text>
+    </svg>
+    <div class="welcome-top"><div class="welcome-mark">AMBR</div><div><b>AMBR</b><small>AOMORI MEGURU BIKE ROOM</small></div></div>
+    <div class="welcome-copy">
+      <div class="welcome-kicker">WELCOME TO OUR RIDE</div>
+      <h2>AMBRアプリへ<br>ようこそ。</h2>
+      <p>仲間と走った道、出会った景色、うまかった飯。<br>みんなの思い出と情報を、ここに残します。</p>
+      <div class="welcome-points"><div class="welcome-point"><i>⌖</i><b>ルートを見る</b></div><div class="welcome-point"><i>▦</i><b>思い出を見る</b></div><div class="welcome-point"><i>◎</i><b>次の目標</b></div></div>
+    </div>
+    <div class="join-panel">
+      <h3>AMBRメンバーとして参加</h3>
+      <p>オープンチャットと同じ名前・アイコンを初回だけ登録します。通常のLINEプロフィールは表示しません。</p>
+      <div id="savedProfile" class="saved-profile"><img id="savedProfileImage" alt="登録したアイコン"><div><b id="savedProfileName"></b><small>このプロフィールで参加</small></div><button onclick="openProfileSetup(event)">変更</button></div>
+      <button id="memberJoinButton" class="line-join" onclick="joinAmbr()">オプチャの名前で参加する</button>
+      <button class="viewer-join" onclick="enterAsViewer()">登録せず、見るだけで入る</button>
+      <div class="join-note">プロフィール登録はこの端末では次回から不要です</div>
+    </div>
+    <p class="viewer-note"><b>見る専も大歓迎。</b> 投稿はいつでも、気が向いたときに。</p>
+    <div class="prototype-note">試作版：プロフィールは現在この端末だけに保存されます</div>
+  </div>
+</section>
+<div class="app">
+  <header>
+    <div class="brand"><div class="mark">AMBR</div><div><h1>AMBR</h1><small>AOMORI MEGURU BIKE ROOM</small></div></div>
+    <button id="headerAvatar" class="avatar" type="button" aria-label="名前とアイコンを変更" title="プロフィールを変更" onclick="openProfileSetup(event)">見</button>
+  </header>
+  <main>
+    <section id="mapView" class="view active">
+      <div class="hero"><div class="eyebrow">みんなの走行マップ</div><h2>走った道を残して、<br>まだ見ぬ青森へ。</h2><p>AMBRの仲間が走ったルートと、次に行きたい場所。</p></div>
+      <div class="stats"><div class="stat"><b>38%</b><span>青森県走破率</span></div><div class="stat"><b>1,284</b><span>みんなの走行 km</span></div><div class="stat"><b>17</b><span>訪問した市町村</span></div></div>
+      <div class="section" style="padding-top:5px">
+        <div class="section-title"><div><h3>AMBR走行マップ</h3><p>濃い道ほど、よく走っています</p></div><button class="pill" onclick="fitAomori()">全体表示</button></div>
+        <div class="map-wrap">
+          <div id="map" class="map"></div>
+          <div class="map-controls"><button id="doneBtn" class="on" onclick="toggleLayer('done')">走った道</button><button id="wantBtn" class="on" onclick="toggleLayer('want')">行きたい道</button></div>
+          <div class="legend"><div><i class="dotline" style="background:#f26a2e"></i>よく走る道</div><div><i class="dotline" style="background:#ffb278"></i>走った道</div><div><i class="dotline" style="background:#3183c8"></i>次の候補</div></div>
+        </div>
+        <div class="mission"><small>NEXT MISSION</small><h4>下北半島を開拓しよう</h4><p>AMBR未走行エリア。大間崎まで約245kmの候補ルートです。</p><button onclick="showToast('行きたい！に登録しました')">行きたい！ 12人</button></div>
+      </div>
+    </section>
+
+    <section id="trailsView" class="view">
+      <div class="trails-hero">
+        <div class="eyebrow">AMBR ROUTE ARCHIVE</div>
+        <h2>みんなの軌跡</h2>
+        <p>過去のルートを全部重ねて、AMBRがどこを、どちら向きに走ってきたのか見てみよう。</p>
+        <div class="gpx-actions">
+          <button class="gpx-upload" onclick="document.getElementById('gpxFiles').click()">＋ GPXをまとめて読む</button>
+          <button id="playTrailsBtn" class="play-all" onclick="toggleTrailPlayback()">▶ 光を流す</button>
+          <input id="gpxFiles" type="file" accept=".gpx,application/gpx+xml" multiple hidden onchange="loadGpxFiles(this.files)" />
+        </div>
+      </div>
+      <div class="section" style="padding-top:0">
+        <div class="comparison-picker"><label for="routeComparison">比べるルート</label><select id="routeComparison" onchange="changeComparison(this.value)"><option value="tsugaru">竜飛岬・津軽半島一周</option><option value="hirosakiHachinohe">弘前 ↔ 八戸</option></select></div>
+        <div id="trailStats" class="trail-stats dynamic"></div>
+        <div class="section-title" style="margin-top:20px"><div><h3>全ルートを重ねて見る</h3><p>光が流れる向きが、実際に走った方向です</p></div><button class="pill" onclick="fitTrails()">全体表示</button></div>
+        <div id="trailsShell" class="trail-map-wrap">
+          <div id="trailsMap" class="trail-map"></div>
+          <div class="trail-map-tools"><div id="trailRouteBadge" class="badge">サンプル 5ルート<br>GPXを追加できます</div><button onclick="clearUploadedRoutes()">追加分を消す</button></div>
+        </div>
+        <div id="trailLegend" class="trail-legend"></div>
+        <div class="insight-card"><h4 id="insightTitle">竜飛岬、どちら回りが多い？</h4><p id="routeInsight"></p></div>
+        <div class="unridden-card"><div class="unridden-icon">◎</div><div><h4>まだ走っていない道</h4><p>下北半島・大間崎周辺に未走行区間があります</p></div><button onclick="focusUnridden()">地図で見る</button></div>
+      </div>
+    </section>
+
+    <section id="ridesView" class="view"><div class="section"><div class="section-title"><div><h3>ツーリング記録</h3><p>ルート・写真・飯情報をひとつに</p></div><button class="pill active">新しい順</button></div>
+      <div class="ride-list">
+        <article class="ride-card"><div class="ride-cover one"><div class="route-art"></div><span class="cover-tag">7月13日</span><span class="cover-count">写真 24枚</span></div><div class="ride-body"><button class="open-detail" onclick="openRide()">見る</button><h4>虹の湖・西目屋ぐるっとツーリング</h4><div class="meta"><span>🏍 138.9km</span><span>⏱ 3時間17分</span></div><div class="members"><i class="face">健</i><i class="face">忍</i><i class="face">彰</i><span>ほか4人</span></div></div></article>
+        <article class="ride-card"><div class="ride-cover two"><div class="route-art"></div><span class="cover-tag">6月28日</span><span class="cover-count">写真 18枚</span></div><div class="ride-body"><button class="open-detail" onclick="openRide()">見る</button><h4>夏泊半島ホタテツーリング</h4><div class="meta"><span>🏍 96.2km</span><span>⏱ 2時間45分</span></div><div class="members"><i class="face">健</i><i class="face">誠</i><i class="face">亮</i><span>6人で走行</span></div></div></article>
+      </div>
+    </div></section>
+
+    <section id="feedView" class="view"><div class="section"><div class="section-title"><div><h3>みんなの思い出</h3><p>流れずに、地図と一緒に残ります</p></div><button class="pill">地域で絞る</button></div>
+      <article class="feed-card"><div class="feed-head"><div class="face" style="margin:0;width:36px;height:36px">忍</div><div><b>忍さんが写真を追加</b><small>虹の湖・西目屋ツーリング · 2時間前</small></div></div><div class="photo-grid"><div class="photo road"></div><div class="photo food"></div></div><p class="feed-text">津軽ダムのあとは西目屋で暗門そば。バイクを店の前に停めやすかったです。</p><div class="chips"><span class="chip">#飯情報</span><span class="chip">#駐車しやすい</span><span class="chip">#西目屋</span></div></article>
+      <article class="feed-card"><div class="feed-head"><div class="face" style="margin:0;width:36px;height:36px;background:#467c84">誠</div><div><b>誠さんが道路情報を追加</b><small>国道102号 · 昨日</small></div></div><p class="feed-text">虹の湖から十和田方面、一部に砂が浮いていました。カーブ手前は少し注意。</p><div class="chips"><span class="chip">#道路情報</span><span class="chip">#安全</span></div></article>
+    </div></section>
+
+    <section id="planView" class="view"><div class="section"><div class="section-title"><div><h3>次はどこへ行く？</h3><p>未走行エリアからみんなで決める</p></div><button class="pill">＋ 候補を追加</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>01</div><div><h4>大間崎・下北半島</h4><p>未走行率 82% · 12人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>02</div><div><h4>龍飛崎・竜泊ライン</h4><p>未走行率 46% · 9人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="plan-card"><div class="datebox"><small>候補</small>03</div><div><h4>十和田湖・奥入瀬</h4><p>未走行率 21% · 7人が行きたい</p></div><button class="vote" onclick="vote(this)">投票</button></div>
+      <div class="mission" style="background:linear-gradient(135deg,#23394a,#33758a)"><small>AMBR CHALLENGE</small><h4>道の駅制覇 12 / 28</h4><p>次は「道の駅よこはま」で13個目。みんなの記録が達成率に加わります。</p><button onclick="showToast('道の駅一覧を開きました')" style="color:#265366">進み具合を見る</button></div>
+    </div></section>
+  </main>
+  <button class="fab" aria-label="ツーリング記録を追加" onclick="showToast('新しいツーリングを作成します')">＋</button>
+  <nav><button class="active" data-view="mapView"><span>⌖</span>マップ</button><button data-view="trailsView"><span>〽</span>軌跡</button><button data-view="ridesView"><span>🏍</span>記録</button><button data-view="feedView"><span>▦</span>思い出</button><button data-view="planView"><span>◎</span>目標</button></nav>
+</div>
+
+<div id="profileModal" class="modal profile-modal" onclick="if(event.target===this)closeProfileSetup()">
+  <div class="profile-sheet">
+    <div class="handle"></div>
+    <h3>オプチャのプロフィールを登録</h3>
+    <p>AMBRのオープンチャットで使っている名前とアイコンを登録してください。初回だけで大丈夫です。</p>
+    <div class="profile-form">
+      <label id="avatarPicker" class="avatar-picker"><span>タップして<br>アイコンを選ぶ</span><img id="profilePreview" alt="アイコンのプレビュー"><input id="profileImageInput" type="file" accept="image/*" onchange="previewProfileImage(this.files[0])"></label>
+      <div class="profile-fields"><label for="profileNameInput">オプチャで使っている名前</label><input id="profileNameInput" maxlength="24" placeholder="例：健さん"></div>
+    </div>
+    <div class="privacy-box">通常のLINE名やプロフィール画像は、AMBRアプリ内に表示しません。正式版ではLINE Loginを本人確認だけに使用します。</div>
+    <button class="profile-save" onclick="saveOpenChatProfile()">このプロフィールで参加する</button>
+    <button class="profile-cancel" onclick="closeProfileSetup()">あとで登録する</button>
+  </div>
+</div>
+
+<div id="rideModal" class="modal" onclick="if(event.target===this)closeRide()"><div class="sheet"><div class="handle"></div><h3>虹の湖・西目屋ぐるっとツーリング</h3><div class="summary">2026年7月13日 · 7人 · 138.9km · 写真24枚</div><div class="mini-map"></div><div class="spot"><b>📍 道の駅 虹の湖</b><p>集合写真 7枚 · 「朝は駐車場が空いていました」</p></div><div class="spot"><b>🍜 西目屋・暗門そば</b><p>飯写真 5枚 · バイク駐車しやすい</p></div><div class="spot"><b>📷 津軽ダム展望所</b><p>景色の写真 12枚 · みんなのコメント</p></div><button class="close" onclick="closeRide()">閉じる</button></div></div>
+<div id="toast" class="toast">完了しました</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const PROFILE_KEY='ambr-openchat-profile-v1';
+  let pendingProfileImage='';
+  const views=[...document.querySelectorAll('.view')], navs=[...document.querySelectorAll('nav button')];
+  navs.forEach(b=>b.addEventListener('click',()=>{views.forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));navs.forEach(n=>n.classList.toggle('active',n===b));window.scrollTo({top:0,behavior:'smooth'});if(b.dataset.view==='mapView'&&map)setTimeout(()=>map.invalidateSize(),80);if(b.dataset.view==='trailsView'){initTrailsMap();setTimeout(()=>{trailsMap.invalidateSize();fitTrails()},100)}}));
+  let map,doneGroup,wantGroup,trailsMap,trailBaseGroup,trailFlowGroup,uploadedTrailGroup,unriddenGroup,trailMarkerGroup;
+  const doneRoutes=[
+    {w:9,c:'#f26a2e',p:[[40.824,140.74],[40.697,140.75],[40.62,140.66],[40.58,140.56],[40.52,140.43],[40.58,140.30]]},
+    {w:7,c:'#ff985b',p:[[40.824,140.74],[40.93,140.73],[41.02,140.82],[40.95,140.97],[40.87,140.96]]},
+    {w:6,c:'#ffb278',p:[[40.824,140.74],[40.85,140.50],[40.81,140.31],[40.78,140.20]]},
+    {w:8,c:'#f26a2e',p:[[40.824,140.74],[40.72,140.68],[40.60,140.58],[40.46,140.55],[40.39,140.57]]},
+    {w:5,c:'#ffb278',p:[[40.824,140.74],[40.80,140.93],[40.86,141.13],[40.93,141.17]]}
+  ];
+  const wantRoutes=[{p:[[40.93,141.17],[41.15,141.22],[41.31,141.20],[41.53,140.91]]},{p:[[40.81,140.31],[41.05,140.34],[41.26,140.34]]}];
+  const sampleTrails=[
+    {name:'小泊から今別へ・7月',side:'west',p:[[40.82,140.74],[40.79,140.46],[40.94,140.39],[41.13,140.30],[41.26,140.34],[41.18,140.48],[41.04,140.63],[40.82,140.74]]},
+    {name:'小泊から今別へ・6月',side:'west',p:[[40.81,140.72],[40.80,140.48],[40.97,140.37],[41.13,140.30],[41.26,140.34],[41.17,140.49],[40.98,140.65],[40.81,140.72]]},
+    {name:'小泊から今別へ・5月',side:'west',p:[[40.84,140.75],[40.78,140.45],[40.93,140.38],[41.12,140.30],[41.25,140.35],[41.18,140.48],[41.00,140.64],[40.84,140.75]]},
+    {name:'今別から小泊へ・9月',side:'east',p:[[40.82,140.74],[41.01,140.64],[41.18,140.48],[41.26,140.34],[41.13,140.30],[40.95,140.38],[40.79,140.46],[40.82,140.74]]},
+    {name:'今別から小泊へ・8月',side:'east',p:[[40.81,140.72],[41.00,140.64],[41.17,140.49],[41.25,140.35],[41.12,140.30],[40.94,140.39],[40.80,140.48],[40.81,140.72]]}
+  ];
+  const hachinoheTrails=[
+    {name:'八甲田越え・7月',side:'hakkoda',p:[[40.60,140.46],[40.68,140.70],[40.65,140.88],[40.57,141.08],[40.54,141.28],[40.51,141.49]]},
+    {name:'八甲田越え・6月',side:'hakkoda',p:[[40.60,140.46],[40.67,140.72],[40.64,140.90],[40.56,141.12],[40.51,141.49]]},
+    {name:'八甲田越え・5月',side:'hakkoda',p:[[40.61,140.47],[40.69,140.68],[40.66,140.87],[40.57,141.09],[40.51,141.49]]},
+    {name:'東北道回り・9月',side:'tohoku',p:[[40.60,140.46],[40.43,140.57],[40.27,140.72],[40.22,140.79],[40.36,141.08],[40.51,141.49]]},
+    {name:'東北道回り・4月',side:'tohoku',p:[[40.60,140.46],[40.42,140.58],[40.25,140.75],[40.34,141.04],[40.51,141.49]]},
+    {name:'青森・みちのく道路・8月',side:'michinoku',p:[[40.60,140.46],[40.82,140.74],[40.86,141.13],[40.69,141.28],[40.51,141.49]]}
+  ];
+  const comparisons={
+    tsugaru:{samples:sampleTrails,title:'竜飛岬、どちら回りが多い？',categories:[{key:'west',label:'小泊 → 竜飛 → 今別',color:'#f26a2e',tone:'orange'},{key:'east',label:'今別 → 竜飛 → 小泊',color:'#3183c8',tone:'blue'}]},
+    hirosakiHachinohe:{samples:hachinoheTrails,title:'弘前と八戸、どの道をよく使う？',categories:[{key:'hakkoda',label:'八甲田越え',color:'#f26a2e',tone:'orange'},{key:'tohoku',label:'東北自動車道回り',color:'#3183c8',tone:'blue'},{key:'michinoku',label:'青森市・みちのく道路',color:'#2c8a68',tone:'green'}]}
+  };
+  let activeComparison='tsugaru';
+  const uploadedTrails=[];
+  const unriddenPath=[[41.29,141.21],[41.40,141.18],[41.52,140.91]];
+  function initMap(){if(!window.L)return;map=L.map('map',{zoomControl:false,attributionControl:true}).setView([40.87,140.74],8);L.control.zoom({position:'bottomright'}).addTo(map);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);doneGroup=L.layerGroup().addTo(map);wantGroup=L.layerGroup().addTo(map);doneRoutes.forEach(r=>L.polyline(r.p,{color:r.c,weight:r.w,opacity:.86,lineCap:'round'}).addTo(doneGroup));wantRoutes.forEach(r=>L.polyline(r.p,{color:'#3183c8',weight:5,dashArray:'9 9',opacity:.9}).addTo(wantGroup));[['弘前','40.603,140.464'],['夏泊','40.926,141.018'],['西目屋','40.576,140.296'],['未走行：大間','41.526,140.908']].forEach(([n,c])=>{let [a,b]=c.split(',').map(Number);L.marker([a,b]).bindPopup('<b>'+n+'</b><br>AMBRスポット').addTo(map)});}
+  function initTrailsMap(){
+    if(trailsMap||!window.L)return;
+    trailsMap=L.map('trailsMap',{zoomControl:false,attributionControl:true}).setView([41.02,140.48],9);
+    L.control.zoom({position:'bottomright'}).addTo(trailsMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(trailsMap);
+    trailBaseGroup=L.layerGroup().addTo(trailsMap);trailFlowGroup=L.layerGroup().addTo(trailsMap);uploadedTrailGroup=L.layerGroup().addTo(trailsMap);unriddenGroup=L.layerGroup().addTo(trailsMap);trailMarkerGroup=L.layerGroup().addTo(trailsMap);
+    L.polyline(unriddenPath,{color:'#3183c8',weight:5,dashArray:'4 10',opacity:.55}).bindTooltip('まだ走っていない区間',{className:'trail-tip'}).addTo(unriddenGroup);
+    redrawTrails();
+  }
+  function categoryColor(key){return comparisons[activeComparison].categories.find(c=>c.key===key)?.color||'#7d8b93'}
+  function drawTrail(route,baseGroup,flowGroup,key=route.side){
+    const color=categoryColor(key);
+    const label=document.createElement('span');label.textContent=route.name;
+    L.polyline(route.p,{color,weight:8,opacity:.23,lineCap:'round'}).bindTooltip(label,{className:'trail-tip'}).addTo(baseGroup);
+    L.polyline(route.p,{color,weight:4,opacity:.95,className:'trail-flow'}).addTo(flowGroup);
+    L.circleMarker(route.p[0],{radius:3,color:'#fff',weight:1,fillColor:'#2c8a68',fillOpacity:1}).addTo(baseGroup);
+    L.circleMarker(route.p[route.p.length-1],{radius:3,color:'#fff',weight:1,fillColor:color,fillOpacity:1}).addTo(baseGroup);
+  }
+  function nearestPointIndex(points,target){let best=Infinity,index=-1;points.forEach((p,i)=>{const d=(p[0]-target[0])**2+(p[1]-target[1])**2;if(d<best){best=d;index=i}});return {index,distance:Math.sqrt(best)}}
+  function classifyTsugaruDirection(points){
+    const kodomari=nearestPointIndex(points,[41.13,140.30]),imabetsu=nearestPointIndex(points,[41.18,140.48]);
+    if(kodomari.distance>.16||imabetsu.distance>.16)return 'other';
+    return kodomari.index<imabetsu.index?'west':'east';
+  }
+  function classifyHachinoheRoute(points){
+    const hirosaki=nearestPointIndex(points,[40.60,140.46]),hachinohe=nearestPointIndex(points,[40.51,141.49]);
+    if(hirosaki.distance>.24||hachinohe.distance>.24)return 'other';
+    if(Math.min(...points.map(p=>p[0]))<40.42)return 'tohoku';
+    const aomori=nearestPointIndex(points,[40.82,140.74]),michinoku=nearestPointIndex(points,[40.86,141.13]),hakkoda=nearestPointIndex(points,[40.65,140.88]);
+    if(aomori.distance<.18&&michinoku.distance<.16)return 'michinoku';
+    if(hakkoda.distance<.18)return 'hakkoda';
+    return 'other';
+  }
+  function classifyForActive(points){return activeComparison==='tsugaru'?classifyTsugaruDirection(points):classifyHachinoheRoute(points)}
+  function parseGpx(text,name){
+    const xml=new DOMParser().parseFromString(text,'application/xml');
+    if(xml.querySelector('parsererror'))throw new Error('GPXの形式を確認してください');
+    let nodes=[...xml.getElementsByTagNameNS('*','trkpt')];if(!nodes.length)nodes=[...xml.getElementsByTagNameNS('*','rtept')];
+    let points=nodes.map(n=>[Number(n.getAttribute('lat')),Number(n.getAttribute('lon'))]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
+    if(points.length<2)throw new Error('ルート座標が見つかりません');
+    if(points.length>1800){const step=Math.ceil(points.length/1800);points=points.filter((_,i)=>i%step===0||i===points.length-1)}
+    return {name,p:points};
+  }
+  async function loadGpxFiles(files){
+    if(!files||!files.length)return;initTrailsMap();let added=0,failed=0;
+    for(const file of files){try{uploadedTrails.push(parseGpx(await file.text(),file.name.replace(/\.gpx$/i,'')));added++}catch(e){failed++}}
+    document.getElementById('gpxFiles').value='';redrawTrails();fitTrails();showToast(added+'件のGPXを追加'+(failed?'（'+failed+'件は読み込めませんでした）':''));
+  }
+  function redrawTrails(){
+    if(!trailsMap)return;trailBaseGroup.clearLayers();trailFlowGroup.clearLayers();uploadedTrailGroup.clearLayers();trailMarkerGroup.clearLayers();
+    const cfg=comparisons[activeComparison];cfg.samples.forEach(r=>drawTrail(r,trailBaseGroup,trailFlowGroup,r.side));uploadedTrails.forEach(r=>drawTrail(r,uploadedTrailGroup,uploadedTrailGroup,classifyForActive(r.p)));
+    const marks=activeComparison==='tsugaru'?[['小泊',41.13,140.30],['竜飛岬',41.26,140.34],['今別',41.18,140.48],['蓬田',40.97,140.65],['青森市',40.82,140.74]]:[['弘前',40.60,140.46],['八甲田',40.65,140.88],['青森市',40.82,140.74],['みちのく道路',40.86,141.13],['八戸',40.51,141.49]];
+    marks.forEach(([n,a,b])=>L.circleMarker([a,b],{radius:4,color:'#fff',weight:2,fillColor:'#121a24',fillOpacity:1}).bindTooltip(n,{className:'trail-tip',direction:'top'}).addTo(trailMarkerGroup));updateTrailStats();
+  }
+  function updateTrailStats(){
+    const cfg=comparisons[activeComparison],keys=cfg.categories.map(c=>c.key),all=[...cfg.samples.map(r=>r.side),...uploadedTrails.map(r=>classifyForActive(r.p))],counts=Object.fromEntries(keys.map(k=>[k,all.filter(v=>v===k).length])),total=Object.values(counts).reduce((a,b)=>a+b,0)||1;
+    const stats=document.getElementById('trailStats');stats.replaceChildren();cfg.categories.forEach(cat=>{const pct=Math.round(counts[cat.key]/total*100),card=document.createElement('div');card.className='trail-stat';card.dataset.color=cat.tone;const small=document.createElement('small'),strong=document.createElement('strong'),span=document.createElement('span'),bar=document.createElement('div'),fill=document.createElement('i');small.textContent=cat.label;strong.textContent=counts[cat.key]+'回';span.textContent=pct+'%';span.style.cssText='font-size:10px;color:var(--muted)';bar.className='bar';fill.style.width=pct+'%';bar.append(fill);card.append(small,strong,span,bar);stats.append(card)});
+    const legend=document.getElementById('trailLegend');legend.replaceChildren();cfg.categories.forEach(cat=>{const span=document.createElement('span'),i=document.createElement('i');i.style.background=cat.color;span.append(i,document.createTextNode(cat.label));legend.append(span)});const other=document.createElement('span'),oi=document.createElement('i');oi.style.background='#7d8b93';other.append(oi,document.createTextNode('判定対象外'));legend.append(other);
+    const winner=cfg.categories.reduce((a,b)=>counts[a.key]>=counts[b.key]?a:b),detail=cfg.categories.map(c=>c.label+' '+counts[c.key]+'回').join('、');document.getElementById('insightTitle').textContent=cfg.title;const insight=document.getElementById('routeInsight');insight.replaceChildren();const bold=document.createElement('b');bold.textContent=winner.label+'が最多。';insight.append(bold,document.createTextNode(detail+'です。'));
+    const badge=document.getElementById('trailRouteBadge');badge.replaceChildren(document.createTextNode('表示 '+cfg.samples.length+'ルート'),document.createElement('br'),document.createTextNode('追加GPX '+uploadedTrails.length+'件'));
+  }
+  function changeComparison(value){activeComparison=value;redrawTrails();fitTrails();showToast('比較ルートを切り替えました')}
+  function clearUploadedRoutes(){if(!uploadedTrails.length){showToast('追加したGPXはありません');return}uploadedTrails.length=0;redrawTrails();fitTrails();showToast('追加したGPXを消しました')}
+  function toggleTrailPlayback(){initTrailsMap();const shell=document.getElementById('trailsShell'),btn=document.getElementById('playTrailsBtn'),playing=shell.classList.toggle('trails-playing');btn.classList.toggle('playing',playing);btn.textContent=playing?'■ 停止する':'▶ 光を流す'}
+  function fitTrails(){if(!trailsMap)return;const points=[...comparisons[activeComparison].samples,...uploadedTrails].flatMap(r=>r.p);if(points.length)trailsMap.fitBounds(points,{padding:[24,24]})}
+  function focusUnridden(){initTrailsMap();document.getElementById('trailsShell').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>trailsMap.fitBounds(unriddenPath,{padding:[55,55]}),280)}
+  function fitAomori(){map&&map.fitBounds([[40.25,139.85],[41.58,141.45]],{padding:[18,18]})}
+  function toggleLayer(k){const g=k==='done'?doneGroup:wantGroup,btn=document.getElementById(k==='done'?'doneBtn':'wantBtn');if(map.hasLayer(g)){map.removeLayer(g);btn.classList.remove('on')}else{map.addLayer(g);btn.classList.add('on')}}
+  function openRide(){document.getElementById('rideModal').classList.add('open')}function closeRide(){document.getElementById('rideModal').classList.remove('open')}
+  function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1900)}
+  function vote(b){b.classList.toggle('voted');b.textContent=b.classList.contains('voted')?'投票済み':'投票';showToast(b.classList.contains('voted')?'投票しました':'投票を取り消しました')}
+  function getOpenChatProfile(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null')}catch(e){return null}}
+  function applyOpenChatProfile(profile){
+    const saved=document.getElementById('savedProfile'),header=document.getElementById('headerAvatar'),join=document.getElementById('memberJoinButton');
+    if(!profile?.name||!profile?.image){saved.classList.remove('show');header.replaceChildren(document.createTextNode('見'));join.textContent='オプチャの名前で参加する';return}
+    document.getElementById('savedProfileName').textContent=profile.name;document.getElementById('savedProfileImage').src=profile.image;saved.classList.add('show');join.textContent=profile.name+'として参加する';
+    const img=document.createElement('img');img.src=profile.image;img.alt=profile.name+'さんのアイコン';header.replaceChildren(img);header.title=profile.name;
+  }
+  function restoreProfile(){applyOpenChatProfile(getOpenChatProfile())}
+  function openProfileSetup(event){if(event)event.stopPropagation();const profile=getOpenChatProfile(),modal=document.getElementById('profileModal'),picker=document.getElementById('avatarPicker'),preview=document.getElementById('profilePreview');document.getElementById('profileNameInput').value=profile?.name||'';pendingProfileImage=profile?.image||'';if(pendingProfileImage){preview.src=pendingProfileImage;picker.classList.add('has-image')}else{preview.removeAttribute('src');picker.classList.remove('has-image')}modal.classList.add('open')}
+  function closeProfileSetup(){document.getElementById('profileModal').classList.remove('open')}
+  function previewProfileImage(file){
+    if(!file)return;if(!file.type.startsWith('image/')){showToast('画像ファイルを選んでください');return}if(file.size>12*1024*1024){showToast('12MBより小さい画像を選んでください');return}
+    const reader=new FileReader();reader.onload=()=>{const image=new Image();image.onload=()=>{const size=256,canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),side=Math.min(image.width,image.height),sx=(image.width-side)/2,sy=(image.height-side)/2;canvas.width=size;canvas.height=size;ctx.drawImage(image,sx,sy,side,side,0,0,size,size);pendingProfileImage=canvas.toDataURL('image/jpeg',.84);document.getElementById('profilePreview').src=pendingProfileImage;document.getElementById('avatarPicker').classList.add('has-image')};image.onerror=()=>showToast('画像を読み込めませんでした');image.src=reader.result};reader.readAsDataURL(file)
+  }
+  function saveOpenChatProfile(){
+    const name=document.getElementById('profileNameInput').value.trim();if(!name){showToast('オプチャの名前を入力してください');return}if(!pendingProfileImage){showToast('オプチャのアイコンを選んでください');return}
+    const profile={name,image:pendingProfileImage,updatedAt:new Date().toISOString()};let persisted=true;try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profile))}catch(e){persisted=false}applyOpenChatProfile(profile);closeProfileSetup();enterApp(persisted?name+'さん、ようこそ！':'参加しました。この端末では保存できませんでした')
+  }
+  function enterApp(message){const w=document.getElementById('welcome');w.classList.add('leave');setTimeout(()=>{w.style.display='none';showToast(message)},450)}
+  function joinAmbr(){const profile=getOpenChatProfile();if(profile?.name&&profile?.image){applyOpenChatProfile(profile);enterApp(profile.name+'さん、ようこそ！')}else openProfileSetup()}
+  function enterAsViewer(){document.getElementById('headerAvatar').replaceChildren(document.createTextNode('見'));enterApp('見るだけで参加しました')}
+  restoreProfile();
+  initMap();
+</script>
+</body>
+</html>
