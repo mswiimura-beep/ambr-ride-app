@@ -12,7 +12,7 @@
 - `supabase/functions/google-maps-to-gpx/` — Googleマップ共有リンクを予定ルートGPXへ変換するEdge Function
 - `README.md` — この管理用メモ
 
-アプリは1ページ構成で、GitHub Pagesから公開しています。投稿、写真、イベント、参加・合流予定の共有にはSupabaseを使用します。Googleマップの短縮URL展開とGPX変換にはSupabase Edge Function、道路ルートの再計算にはOSRMを使用します。名前とアイコン、完走記録は利用者の端末内に保存され、完走記録へ連動した元のGPXファイルはIndexedDBに保存されます。
+アプリは1ページ構成で、GitHub Pagesから公開しています。投稿、写真、イベント、参加・合流予定の共有にはSupabaseを使用します。Googleマップの短縮URL展開とGPX変換にはSupabase Edge Function、道路ルートの再計算にはOSRMを使用します。現在地周辺の天気にはOpen-Meteoを使用し、位置情報は天気取得にだけ利用して保存しません。名前とアイコン、完走記録は利用者の端末内に保存され、完走記録へ連動した元のGPXファイルはIndexedDBに保存されます。
 
 ## 利用前の注意
 
