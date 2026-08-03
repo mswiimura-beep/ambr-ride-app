@@ -174,7 +174,7 @@
     <label class="entry-field"><span>場所・店の名前（必須）</span><input id="midwayPlaceInput" maxlength="80" autocomplete="off" placeholder="例：浅虫の食堂"></label>
     <div class="location-row"><button id="locationButton" type="button" onclick="captureMidwayLocation()">⌖ 現在地を付ける</button><div id="locationState" class="location-state">現在地は任意です。許可しなくても投稿できます。</div></div>
     <label class="entry-field"><span>コメント</span><textarea id="midwayCommentInput" maxlength="500" placeholder="例：ホタテカレー。店の横にバイクを停められます"></textarea></label>
-    <label id="midwayPhotoPicker" class="ride-photo-picker"><span>タップして写真を選ぶ（必須）</span><img id="midwayPhotoPreview" alt="共有する写真のプレビュー"><input id="midwayPhotoInput" type="file" accept="image/*" capture="environment" onchange="previewMidwayPhoto(this.files[0])"></label>
+    <label id="midwayPhotoPicker" class="ride-photo-picker"><span>タップして保存済みの写真を選ぶ（必須）</span><img id="midwayPhotoPreview" alt="共有する写真のプレビュー"><input id="midwayPhotoInput" type="file" accept="image/*" onchange="previewMidwayPhoto(this.files[0])"></label>
     <div class="form-note">「仲間に共有する」を押すと、入力した場所・写真・コメントがSupabaseへ送信され、AMBRアプリの利用者に表示されます。通信できない時はこの端末に送信待ちで残します。</div>
     <button id="midwaySaveButton" class="entry-save" type="button" onclick="saveMidwayPost()">仲間に共有する</button>
     <button class="entry-cancel" type="button" onclick="closeMidwayPostForm()">キャンセル</button>
