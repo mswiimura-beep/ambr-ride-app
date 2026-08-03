@@ -272,7 +272,7 @@
   const PROFILE_KEY='ambr-openchat-profile-v1',RIDE_KEY='ambr-local-rides-v1',MIDWAY_OUTBOX_KEY='ambr-midway-outbox-v1';
   const SUPABASE_URL='https://hfilysmmzvbuqypnxqai.supabase.co',SUPABASE_PUBLISHABLE_KEY='sb_publishable_GupuLZDB109jlEpxtfuiEQ_l6wxvTpd',MIDWAY_BUCKET='midway-photos';
   const supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}})||null;
-  let pendingProfileImage='',pendingRideImage='',pendingMidwayImage='',pendingMidwayLocation=null,midwayUser=null,midwayLoading=false,midwayRemotePosts=[],midwayLocationMap=null,midwayLocationMarker=null;
+  let pendingProfileImage='',pendingRideImage='',pendingMidwayImage='',pendingMidwayLocation=null,midwayUser=null,midwaySessionPromise=null,midwayLoading=false,midwayRemotePosts=[],midwayLocationMap=null,midwayLocationMarker=null;
   let eventsData=[],eventsLoading=false,eventMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),selectedEventDate=null,pendingEventLocation=null,eventFormMap=null,eventFormMarker=null,eventDetailMap=null,eventDetailMarker=null,activeEventId=null;
   const views=[...document.querySelectorAll('.view')], navs=[...document.querySelectorAll('nav[aria-label="メインメニュー"] button')];
   const viewHashes={menuView:'menu',mapView:'map',trailsView:'trails',ridesView:'rides',feedView:'feed',eventsView:'events',planView:'plan'};
@@ -414,9 +414,9 @@
   async function ensureMidwaySession(){
     if(!supabaseClient)throw new Error('共有機能を読み込めません');
     if(midwayUser)return midwayUser;
-    const {data,error}=await supabaseClient.auth.getSession();if(error)throw error;
-    if(data.session?.user){midwayUser=data.session.user;return midwayUser}
-    const signed=await supabaseClient.auth.signInAnonymously();if(signed.error)throw signed.error;midwayUser=signed.data.user;return midwayUser;
+    if(midwaySessionPromise)return midwaySessionPromise;
+    midwaySessionPromise=(async()=>{const {data,error}=await supabaseClient.auth.getSession();if(error)throw error;if(data.session?.user){midwayUser=data.session.user;return midwayUser}const signed=await supabaseClient.auth.signInAnonymously();if(signed.error)throw signed.error;midwayUser=signed.data.user;return midwayUser})();
+    try{return await midwaySessionPromise}finally{midwaySessionPromise=null}
   }
   function formatPostTime(value){const date=new Date(value),diff=Math.max(0,Date.now()-date.getTime()),minutes=Math.floor(diff/60000);if(!Number.isFinite(date.getTime()))return '';if(minutes<1)return 'たった今';if(minutes<60)return minutes+'分前';const hours=Math.floor(minutes/60);if(hours<24)return hours+'時間前';return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(date)}
   function buildMidwayCard(record,{pending=false}={}){
