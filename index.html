@@ -13,7 +13,7 @@
     *{box-sizing:border-box}html{background:#d8d5cf;min-height:100%;scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh;min-height:100dvh;overflow-x:hidden}
     button,input,select{font:inherit}button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}.app{max-width:720px;margin:auto;min-height:100vh;min-height:100dvh;background:var(--paper);position:relative;padding-bottom:calc(var(--nav-content-height) + var(--safe-bottom) + 24px);box-shadow:0 0 50px rgba(20,27,35,.14)}
     header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
-    .brand{display:flex;gap:11px;align-items:center}.mark{width:39px;height:39px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:var(--orange2);font-weight:900;font-size:12px;letter-spacing:-.6px}.brand h1{font-size:19px;letter-spacing:.06em;margin:0}.brand small{display:block;color:#aeb8c3;font-size:10px;margin-top:2px;letter-spacing:.08em}.avatar{width:44px;height:44px;padding:0;border-radius:50%;background:linear-gradient(135deg,#ffb06b,#ef5f2a);color:#fff;display:grid;place-items:center;font-weight:800;border:2px solid rgba(255,255,255,.45);overflow:hidden;cursor:pointer}.avatar img{width:100%;height:100%;object-fit:cover}
+    .brand{display:flex;gap:11px;align-items:center}.brand-button{border:0;background:transparent;color:#fff;padding:0;min-height:44px;text-align:left;cursor:pointer}.mark{width:39px;height:39px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:var(--orange2);font-weight:900;font-size:12px;letter-spacing:-.6px}.brand h1{font-size:19px;letter-spacing:.06em;margin:0}.brand small{display:block;color:#aeb8c3;font-size:10px;margin-top:2px;letter-spacing:.08em}.avatar{width:44px;height:44px;padding:0;border-radius:50%;background:linear-gradient(135deg,#ffb06b,#ef5f2a);color:#fff;display:grid;place-items:center;font-weight:800;border:2px solid rgba(255,255,255,.45);overflow:hidden;cursor:pointer}.avatar img{width:100%;height:100%;object-fit:cover}
     main{display:block}.view{display:none}.view.active{display:block}.section{padding:18px}.hero{background:var(--navy);color:#fff;padding:7px 20px 22px}.eyebrow{font-size:11px;color:#ffb06b;font-weight:800;letter-spacing:.12em}.hero h2{font-size:26px;line-height:1.35;margin:7px 0 7px}.hero p{margin:0;color:#b9c2cc;font-size:13px;line-height:1.65}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:-1px;padding:0 18px;transform:translateY(-12px)}.stat{background:#fff;border-radius:16px;padding:14px 10px;box-shadow:var(--shadow);text-align:center}.stat b{font-size:20px;display:block}.stat span{font-size:10px;color:var(--muted)}
     .section-title{display:flex;justify-content:space-between;align-items:end;margin:6px 0 12px}.section-title h3{font-size:18px;margin:0}.section-title p{font-size:11px;color:var(--muted);margin:0}.pill{border:0;border-radius:999px;padding:7px 11px;background:#ece8df;color:#59636d;font-size:11px;font-weight:700}.pill.active{background:#ffe0c9;color:#b33e11}
@@ -22,6 +22,7 @@
     .ride-list{display:grid;gap:13px}.ride-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 7px 22px rgba(30,38,46,.08);border:1px solid rgba(20,30,40,.05)}.ride-cover{height:116px;background:linear-gradient(115deg,#263747,#59766c);position:relative;overflow:hidden}.ride-cover.one{background:linear-gradient(135deg,#364e58,#f38a49)}.ride-cover.two{background:linear-gradient(135deg,#1c435e,#71a4a2)}.route-art{position:absolute;inset:0;opacity:.9}.route-art:before{content:"";position:absolute;width:75%;height:70%;left:12%;top:12%;border:4px solid rgba(255,255,255,.87);border-left-color:transparent;border-radius:50% 45% 35% 60%;transform:rotate(-8deg)}.cover-tag{position:absolute;top:11px;left:11px;background:rgba(18,26,36,.78);color:#fff;border-radius:9px;padding:6px 9px;font-size:10px}.cover-count{position:absolute;right:11px;bottom:10px;background:rgba(255,255,255,.9);border-radius:9px;padding:6px 9px;font-size:10px;font-weight:800}.ride-body{padding:14px}.ride-body h4{font-size:16px;margin:0 0 7px}.meta{display:flex;gap:13px;color:var(--muted);font-size:11px}.members{display:flex;align-items:center;margin-top:12px}.face{width:27px;height:27px;border:2px solid #fff;border-radius:50%;background:#e98755;display:grid;place-items:center;color:#fff;font-size:10px;margin-right:-6px}.face:nth-child(2){background:#467c84}.face:nth-child(3){background:#7f6959}.members span{font-size:10px;color:var(--muted);margin-left:12px}.open-detail{float:right;border:0;background:#f1eee8;border-radius:10px;padding:7px 10px;font-weight:700;font-size:11px}
     .feed-card{background:#fff;border-radius:18px;padding:15px;margin-bottom:13px;box-shadow:0 6px 20px rgba(20,30,40,.07)}.feed-head{display:flex;align-items:center;gap:10px}.feed-head b{font-size:13px}.feed-head small{display:block;color:var(--muted)}.photo-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:5px;margin-top:12px;height:178px}.photo{border-radius:12px;background:linear-gradient(145deg,#9dc3c0,#365265);position:relative;overflow:hidden}.photo.food{background:radial-gradient(circle at 50% 55%,#f2cb7b 0 21%,#b95f2f 22% 31%,#f4eee1 32% 36%,#91643b 37% 40%,#253440 41%)}.photo.road:after{content:"";position:absolute;width:40%;height:120%;background:#3d464b;left:30%;transform:perspective(180px) rotateX(30deg);border-left:3px solid #eee;border-right:3px solid #eee}.feed-text{font-size:13px;line-height:1.7;margin:11px 1px 3px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.chip{font-size:10px;background:#f0ede7;border-radius:999px;padding:6px 8px;color:#64707a}
     .plan-card{background:#fff;padding:15px;border-radius:18px;margin-bottom:12px;display:flex;gap:13px;align-items:center}.datebox{width:52px;height:55px;background:#fff0e5;color:#c74b17;border-radius:13px;display:grid;place-items:center;line-height:1;text-align:center;font-weight:900}.datebox small{font-size:10px}.plan-card h4{font-size:14px;margin:0 0 5px}.plan-card p{font-size:11px;color:var(--muted);margin:0}.vote{margin-left:auto;border:0;background:var(--navy);color:#fff;border-radius:11px;padding:9px;font-size:10px}.vote.voted{background:var(--green)}
+    .menu-hero{background:linear-gradient(155deg,#121a24 0%,#203747 100%);color:#fff;padding:24px 20px 28px;position:relative;overflow:hidden}.menu-hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-95px;top:-100px}.menu-hero h2{font-size:29px;margin:6px 0 8px;position:relative}.menu-hero p{font-size:12px;line-height:1.7;color:#bec8d1;margin:0;position:relative}.sync-pill{display:inline-flex;align-items:center;gap:7px;margin-top:15px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.1);font-size:10px;font-weight:800;position:relative}.sync-pill i{width:8px;height:8px;border-radius:50%;background:#f2b84b}.sync-pill.online i{background:#55d49a}.sync-pill.offline i{background:#ff8266}.menu-primary{width:100%;min-height:72px;border:0;border-radius:18px;background:linear-gradient(135deg,#f26a2e,#ff9c51);color:#fff;padding:14px 16px;text-align:left;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px}.menu-primary>span:first-child{font-size:28px}.menu-primary b{display:block;font-size:16px}.menu-primary small{display:block;font-size:10px;opacity:.88;margin-top:3px}.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}.menu-card{min-height:112px;border:1px solid rgba(20,30,40,.05);border-radius:18px;background:#fff;color:var(--ink);padding:15px;text-align:left;box-shadow:0 6px 20px rgba(20,30,40,.07)}.menu-card .menu-icon{font-size:24px;display:block;margin-bottom:9px}.menu-card b{font-size:14px;display:block}.menu-card small{font-size:10px;color:var(--muted);line-height:1.5;display:block;margin-top:4px}.menu-card.wide{grid-column:1/-1;min-height:90px}.menu-help{background:#eaf4f8;border-radius:17px;padding:14px;margin-top:14px}.menu-help h3{font-size:13px;margin:0 0 7px}.menu-help p{font-size:10px;color:#4f6c7b;line-height:1.7;margin:0}.subview-toolbar{min-height:52px;padding:5px 14px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}.subview-toolbar[hidden]{display:none}.back-menu{min-width:104px;min-height:44px;border:0;border-radius:12px;background:#ece8df;color:#4f5962;font-weight:900;font-size:12px}.subview-toolbar strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fab[hidden]{display:none}
     .fab{position:fixed;z-index:1001;right:max(calc((100vw - 720px)/2 + 18px),18px);bottom:calc(var(--nav-content-height) + var(--safe-bottom) + 12px);width:56px;height:56px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:28px;box-shadow:0 8px 24px rgba(216,75,20,.42)}
     nav{position:fixed;z-index:1000;bottom:0;left:50%;transform:translateX(-50%);width:min(720px,100%);height:calc(var(--nav-content-height) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);backdrop-filter:blur(14px)}nav button{border:0;background:transparent;color:#89929a;font-size:9px;font-weight:700;padding:2px;min-width:44px;min-height:44px}nav button span{display:block;font-size:20px;margin-bottom:2px}nav button.active{color:var(--orange)}
     .trails-hero{background:linear-gradient(155deg,#121a24 0%,#1e3444 100%);color:#fff;padding:18px 20px 26px;position:relative;overflow:hidden}.trails-hero:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(255,255,255,.09);border-radius:50%;right:-80px;top:-90px}.trails-hero .eyebrow{position:relative;z-index:1}.trails-hero h2{font-size:27px;line-height:1.35;margin:7px 0}.trails-hero p{font-size:12px;line-height:1.7;color:#bec8d1;margin:0;max-width:430px}.gpx-actions{display:flex;gap:8px;margin-top:15px;position:relative;z-index:1}.gpx-upload,.play-all{border:0;border-radius:12px;padding:11px 13px;font-weight:900;font-size:12px}.gpx-upload{background:var(--orange);color:#fff}.play-all{background:rgba(255,255,255,.11);color:#fff;border:1px solid rgba(255,255,255,.14)}.play-all.playing{background:#fff;color:var(--navy)}
@@ -38,7 +39,7 @@
     .map-status{position:absolute;inset:0;z-index:650;display:grid;place-items:center;text-align:center;padding:24px;background:#e7ecea;color:#52616a;font-size:12px;line-height:1.7}.map-status[hidden]{display:none}.map-status b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
     .leaflet-control-zoom a{width:44px!important;height:44px!important;line-height:44px!important;font-size:22px!important}
     .pill,.mission button,.map-controls button,.gpx-upload,.play-all,.trail-map-tools button,.unridden-card button,.open-detail,.vote{min-height:44px}.open-detail,.vote{min-width:44px}
-    @media(max-width:390px){.section{padding-left:14px;padding-right:14px}.stats{padding-left:14px;padding-right:14px}.section-title{align-items:center;gap:8px}.section-title>div{min-width:0}.section-title p{line-height:1.4}.gpx-actions{flex-wrap:wrap}.gpx-actions button{flex:1 1 145px}.comparison-picker{align-items:stretch;flex-direction:column}.comparison-picker select{width:100%}.plan-card{align-items:flex-start;flex-wrap:wrap}.plan-card>div:nth-child(2){flex:1;min-width:150px}.plan-card .vote{margin-left:65px}.profile-form{align-items:flex-start}.avatar-picker{width:72px;height:72px}.entry-grid{grid-template-columns:1fr}}
+    @media(max-width:390px){.section{padding-left:14px;padding-right:14px}.stats{padding-left:14px;padding-right:14px}.section-title{align-items:center;gap:8px}.section-title>div{min-width:0}.section-title p{line-height:1.4}.gpx-actions{flex-wrap:wrap}.gpx-actions button{flex:1 1 145px}.comparison-picker{align-items:stretch;flex-direction:column}.comparison-picker select{width:100%}.plan-card{align-items:flex-start;flex-wrap:wrap}.plan-card>div:nth-child(2){flex:1;min-width:150px}.plan-card .vote{margin-left:65px}.profile-form{align-items:flex-start}.avatar-picker{width:72px;height:72px}.entry-grid{grid-template-columns:1fr}.menu-grid{gap:9px}.menu-card{min-height:106px;padding:13px}.menu-hero h2{font-size:26px}}
     @media(max-height:640px){.welcome-inner{padding-top:calc(14px + var(--safe-top));padding-bottom:calc(12px + var(--safe-bottom))}.welcome-mark{width:44px;height:44px;font-size:12px}.welcome-top b{font-size:17px}.welcome-copy{margin:12px 0 10px}.welcome-copy h2{font-size:27px;line-height:1.22;margin:5px 0 8px}.welcome-copy p{font-size:12px;line-height:1.55}.welcome-points{display:none}.join-panel{padding:12px;border-radius:17px}.join-panel>p{margin-bottom:8px}.viewer-note{margin:7px 0 0}.prototype-note{margin-top:4px}}
     @media(max-height:470px),(orientation:landscape) and (max-height:500px){.welcome-inner{padding-left:18px;padding-right:18px}.welcome-copy{margin:8px 0}.welcome-copy h2{font-size:23px;margin:3px 0}.welcome-copy p,.join-panel h3,.join-panel>p,.join-note,.viewer-note,.prototype-note{display:none}.join-panel{padding:10px}.line-join{min-height:48px}.saved-profile{margin-bottom:7px;padding:5px}.welcome-inner:after{display:none}.profile-sheet>p,.privacy-box{display:none}.profile-form{margin:8px 0 10px}}
     @media(min-width:700px){.map{height:430px}.ride-list{grid-template-columns:1fr 1fr}.hero h2{font-size:31px}.aomori-bg{right:-95px;width:670px;height:670px}}
@@ -73,14 +74,31 @@
     <p class="viewer-note"><b>見る専も大歓迎。</b> 投稿はいつでも、気が向いたときに。</p>
     <div class="prototype-note">試作版：プロフィールは現在この端末だけに保存されます</div>
   </div>
-</section>
+  </section>
 <div class="app">
   <header>
-    <div class="brand"><div class="mark">AMBR</div><div><h1>AMBR</h1><small>AOMORI MEGURU BIKE ROOM</small></div></div>
+    <button class="brand brand-button" type="button" aria-label="メニュー画面に戻る" onclick="goToMenu()"><span class="mark">AMBR</span><span><span style="font-size:19px;font-weight:900;letter-spacing:.06em">AMBR</span><small>タップでメニューへ</small></span></button>
     <button id="headerAvatar" class="avatar" type="button" aria-label="名前とアイコンを変更" title="プロフィールを変更" onclick="openProfileSetup(event)">見</button>
   </header>
   <main>
-    <section id="mapView" class="view active">
+    <div id="viewToolbar" class="subview-toolbar" hidden><button class="back-menu" type="button" onclick="goToMenu()">← メニュー</button><strong id="currentViewTitle"></strong></div>
+
+    <section id="menuView" class="view active">
+      <div class="menu-hero"><div class="eyebrow">AMBR MENU</div><h2>今日は何をする？</h2><p>走る前も、ツーリングの途中も、帰ってからも。<br>ここからすべての機能へ移動できます。</p><div id="syncPill" class="sync-pill"><i></i><span id="syncPillText">共有機能に接続中…</span></div></div>
+      <div class="section">
+        <button class="menu-primary" type="button" onclick="openMidwayPostForm()"><span>📷</span><span><b>途中の場所と写真を共有</b><small>昼ごはん・景色・道路情報を仲間に送る</small></span></button>
+        <div class="menu-grid">
+          <button class="menu-card" type="button" onclick="openAppView('mapView')"><span class="menu-icon">⌖</span><b>走行マップ</b><small>走った道と次に行きたい道</small></button>
+          <button class="menu-card" type="button" onclick="openAppView('trailsView')"><span class="menu-icon">〽</span><b>みんなの軌跡</b><small>GPXと走った方向を比較</small></button>
+          <button class="menu-card" type="button" onclick="openAppView('ridesView')"><span class="menu-icon">🏍</span><b>ツーリング記録</b><small>完走後の記録を端末に保存</small></button>
+          <button class="menu-card" type="button" onclick="openAppView('feedView')"><span class="menu-icon">▦</span><b>途中投稿を見る</b><small><span id="sharedPostCount">0件</span>の共有投稿</small></button>
+          <button class="menu-card wide" type="button" onclick="openAppView('planView')"><span class="menu-icon">◎</span><b>次の目標・行き先</b><small>候補地への投票と道の駅の進み具合</small></button>
+        </div>
+        <div class="menu-help"><h3>ブラウザで迷わない使い方</h3><p>各画面上部の「← メニュー」、画面下の「メニュー」、または左上のAMBRロゴで、いつでもこの画面へ戻れます。ブラウザの戻るボタンも使えます。</p></div>
+      </div>
+    </section>
+
+    <section id="mapView" class="view">
       <div class="hero"><div class="eyebrow">みんなの走行マップ</div><h2>走った道を残して、<br>まだ見ぬ青森へ。</h2><p>AMBRの仲間が走ったルートと、次に行きたい場所。</p></div>
       <div class="stats"><div class="stat"><b>38%</b><span>青森県走破率</span></div><div class="stat"><b>1,284</b><span>みんなの走行 km</span></div><div class="stat"><b>17</b><span>訪問した市町村</span></div></div>
       <div class="section" style="padding-top:5px">
@@ -144,7 +162,7 @@
     </div></section>
   </main>
   <button class="fab" aria-label="場所と写真を途中投稿" onclick="openMidwayPostForm()">＋</button>
-  <nav aria-label="メインメニュー"><button class="active" data-view="mapView" aria-current="page"><span>⌖</span>マップ</button><button data-view="trailsView"><span>〽</span>軌跡</button><button data-view="ridesView"><span>🏍</span>記録</button><button data-view="feedView"><span>▦</span>思い出</button><button data-view="planView"><span>◎</span>目標</button></nav>
+  <nav aria-label="メインメニュー"><button class="active" data-view="menuView" aria-current="page"><span>☰</span>メニュー</button><button data-view="mapView"><span>⌖</span>マップ</button><button data-view="trailsView"><span>〽</span>軌跡</button><button data-view="ridesView"><span>🏍</span>記録</button><button data-view="feedView"><span>▦</span>共有</button></nav>
 </div>
 
 <div id="midwayPostModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="midwayPostTitle" onclick="if(event.target===this)closeMidwayPostForm()">
@@ -205,20 +223,24 @@
   const SUPABASE_URL='https://hfilysmmzvbuqypnxqai.supabase.co',SUPABASE_PUBLISHABLE_KEY='sb_publishable_GupuLZDB109jlEpxtfuiEQ_l6wxvTpd',MIDWAY_BUCKET='midway-photos';
   const supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}})||null;
   let pendingProfileImage='',pendingRideImage='',pendingMidwayImage='',pendingMidwayLocation=null,midwayUser=null,midwayLoading=false,midwayRemotePosts=[];
-  const views=[...document.querySelectorAll('.view')], navs=[...document.querySelectorAll('nav button')];
-  const viewHashes={mapView:'map',trailsView:'trails',ridesView:'rides',feedView:'feed',planView:'plan'};
+  const views=[...document.querySelectorAll('.view')], navs=[...document.querySelectorAll('nav[aria-label="メインメニュー"] button')];
+  const viewHashes={menuView:'menu',mapView:'map',trailsView:'trails',ridesView:'rides',feedView:'feed',planView:'plan'};
+  const viewTitles={menuView:'メニュー',mapView:'走行マップ',trailsView:'みんなの軌跡',ridesView:'ツーリング記録',feedView:'途中投稿・思い出',planView:'次の目標・行き先'};
   let toastTimer,lastFocusedElement=null;
-  function activeViewId(){return document.querySelector('.view.active')?.id||'mapView'}
+  function activeViewId(){return document.querySelector('.view.active')?.id||'menuView'}
   function setView(viewId,{push=false,scroll=true}={}){
-    if(!viewHashes[viewId])viewId='mapView';
+    if(!viewHashes[viewId])viewId='menuView';
     views.forEach(v=>v.classList.toggle('active',v.id===viewId));
     navs.forEach(n=>{const active=n.dataset.view===viewId;n.classList.toggle('active',active);if(active)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current')});
+    const toolbar=document.getElementById('viewToolbar'),fab=document.querySelector('.fab');toolbar.hidden=viewId==='menuView';document.getElementById('currentViewTitle').textContent=viewTitles[viewId]||'';fab.hidden=viewId==='menuView';document.title=(viewTitles[viewId]||'AMBR')+' — AMBR';
     if(push&&history.state?.ambrView!==viewId)history.pushState({ambrView:viewId},'',location.pathname+location.search+'#'+viewHashes[viewId]);
     if(scroll)window.scrollTo({top:0,behavior:'smooth'});
     if(viewId==='mapView'&&map)setTimeout(()=>map?.invalidateSize(),80);
     if(viewId==='trailsView'&&initTrailsMap())setTimeout(()=>{trailsMap?.invalidateSize();fitTrails()},100);
     if(viewId==='feedView')refreshMidwayPosts(false);
   }
+  function openAppView(viewId){setView(viewId,{push:true})}
+  function goToMenu({replace=false}={}){if(replace){history.replaceState({ambrView:'menuView'},'',location.pathname+location.search+'#menu');setView('menuView',{push:false})}else setView('menuView',{push:true})}
   navs.forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view,{push:true})));
   let map,doneGroup,wantGroup,trailsMap,trailBaseGroup,trailFlowGroup,uploadedTrailGroup,unriddenGroup,trailMarkerGroup;
   const doneRoutes=[
@@ -352,13 +374,16 @@
     if(pending){const badge=document.createElement('span'),retry=document.createElement('button');badge.className='pending-badge';badge.textContent='送信待ち';retry.type='button';retry.textContent='↻ もう一度送る';retry.addEventListener('click',()=>retryMidwayPost(record.clientPostId,retry));meta.append(badge,retry)}else if(midwayUser&&record.user_id===midwayUser.id){const del=document.createElement('button');del.type='button';del.className='delete-post';del.textContent='削除';del.addEventListener('click',()=>deleteMidwayPost(record.id,record.photo_path));meta.append(del)}
     card.append(head,photo,text,meta);return card;
   }
+  function updateSyncStatus(state){const pill=document.getElementById('syncPill'),text=document.getElementById('syncPillText');if(!pill||!text)return;pill.classList.toggle('online',state==='online');pill.classList.toggle('offline',state==='offline');text.textContent=state==='online'?'共有機能 オンライン':state==='offline'?'オフライン・投稿は送信待ちに保存':'共有機能に接続中…'}
+  function updateSharedPostCount(){const count=document.getElementById('sharedPostCount');if(count)count.textContent=(midwayRemotePosts.length+getMidwayOutbox().length)+'件'}
   function renderMidwayPosts(errorMessage=''){
     const list=document.getElementById('midwayPostList'),pending=getMidwayOutbox();list.replaceChildren();pending.forEach(item=>list.append(buildMidwayCard(item,{pending:true})));midwayRemotePosts.forEach(item=>list.append(buildMidwayCard(item)));
     if(errorMessage||(!pending.length&&!midwayRemotePosts.length)){const status=document.createElement('div'),retry=document.createElement('button');status.className='shared-status';status.textContent=errorMessage||'まだ途中投稿はありません。最初の場所と写真を共有してみましょう。';if(errorMessage){retry.type='button';retry.textContent='もう一度読み込む';retry.addEventListener('click',()=>refreshMidwayPosts(true));status.append(retry)}list.append(status)}
+    updateSharedPostCount();
   }
   async function refreshMidwayPosts(showResult=false){
     if(midwayLoading)return;midwayLoading=true;const list=document.getElementById('midwayPostList');if(!midwayRemotePosts.length&&!getMidwayOutbox().length)list.innerHTML='<div class="shared-status">共有投稿を読み込んでいます…</div>';
-    try{await ensureMidwaySession();const {data,error}=await supabaseClient.from('midway_posts').select('*').order('created_at',{ascending:false}).limit(50);if(error)throw error;midwayRemotePosts=await Promise.all((data||[]).map(async row=>{const signed=await supabaseClient.storage.from(MIDWAY_BUCKET).createSignedUrl(row.photo_path,3600);return {...row,signedUrl:signed.data?.signedUrl||''}}));renderMidwayPosts();if(showResult)showToast('最新の途中投稿に更新しました')}catch(e){renderMidwayPosts('共有投稿を読み込めませんでした。通信状態を確認してください。');if(showResult)showToast('途中投稿を更新できませんでした')}finally{midwayLoading=false}
+    try{await ensureMidwaySession();const {data,error}=await supabaseClient.from('midway_posts').select('*').order('created_at',{ascending:false}).limit(50);if(error)throw error;midwayRemotePosts=await Promise.all((data||[]).map(async row=>{const signed=await supabaseClient.storage.from(MIDWAY_BUCKET).createSignedUrl(row.photo_path,3600);return {...row,signedUrl:signed.data?.signedUrl||''}}));renderMidwayPosts();updateSyncStatus('online');if(showResult)showToast('最新の途中投稿に更新しました')}catch(e){renderMidwayPosts('共有投稿を読み込めませんでした。通信状態を確認してください。');updateSyncStatus('offline');if(showResult)showToast('途中投稿を更新できませんでした')}finally{midwayLoading=false}
   }
   function dataUrlToBlob(dataUrl){const [header,data]=dataUrl.split(','),mime=header.match(/data:([^;]+)/)?.[1]||'image/jpeg',bytes=atob(data),array=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)array[i]=bytes.charCodeAt(i);return new Blob([array],{type:mime})}
   async function sendMidwayRecord(record){
@@ -420,15 +445,16 @@
     const profile={name,image:pendingProfileImage,updatedAt:new Date().toISOString()};let persisted=true;try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profile))}catch(e){persisted=false}applyOpenChatProfile(profile);hideModal('profileModal');history.replaceState({ambrView:activeViewId()},'',location.pathname+location.search+'#'+viewHashes[activeViewId()]);const welcome=document.getElementById('welcome');if(welcome.style.display==='none'||welcome.classList.contains('leave'))showToast(persisted?'プロフィールを変更しました':'変更しましたが、この端末では保存できませんでした');else enterApp(persisted?name+'さん、ようこそ！':'参加しました。この端末では保存できませんでした')
   }
   function enterApp(message){const w=document.getElementById('welcome');w.classList.add('leave');setTimeout(()=>{w.style.display='none';w.setAttribute('aria-hidden','true');document.querySelector('nav button.active')?.focus();showToast(message)},450)}
-  function enterAmbr(){const profile=getOpenChatProfile();if(profile?.name&&profile?.image){applyOpenChatProfile(profile);enterApp(profile.name+'さん、ようこそ！')}else{applyOpenChatProfile(null);enterApp('AMBRアプリへようこそ！')}}
+  function enterAmbr(){goToMenu({replace:true});const profile=getOpenChatProfile();if(profile?.name&&profile?.image){applyOpenChatProfile(profile);enterApp(profile.name+'さん、ようこそ！')}else{applyOpenChatProfile(null);enterApp('AMBRアプリへようこそ！')}}
   function joinAmbr(){enterAmbr()}
   function enterAsViewer(){enterAmbr()}
-  window.addEventListener('popstate',event=>{document.querySelectorAll('.modal.open').forEach(modal=>hideModal(modal.id));setView(event.state?.ambrView||'mapView',{push:false})});
+  window.addEventListener('popstate',event=>{document.querySelectorAll('.modal.open').forEach(modal=>hideModal(modal.id));setView(event.state?.ambrView||'menuView',{push:false})});
   window.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const open=document.querySelector('.modal.open');if(open){event.preventDefault();closeModal(open.id)}});
   window.addEventListener('orientationchange',()=>setTimeout(()=>{map?.invalidateSize();trailsMap?.invalidateSize()},180));
-  window.addEventListener('online',()=>retryMidwayOutbox());
+  window.addEventListener('online',()=>{updateSyncStatus('loading');retryMidwayOutbox()});
+  window.addEventListener('offline',()=>updateSyncStatus('offline'));
   window.addEventListener('unhandledrejection',()=>showToast('処理を完了できませんでした。もう一度お試しください'));
-  const initialView=Object.entries(viewHashes).find(([,hash])=>'#'+hash===location.hash)?.[0]||'mapView';
+  const initialView=Object.entries(viewHashes).find(([,hash])=>'#'+hash===location.hash)?.[0]||'menuView';
   history.replaceState({ambrView:initialView},'',location.pathname+location.search+'#'+viewHashes[initialView]);
   setView(initialView,{push:false,scroll:false});
   renderSavedRides();
