@@ -100,6 +100,25 @@ function extractEmbeddedCoordinates(url: URL): Point[] {
   return points;
 }
 
+function extractPlaceLabel(url: URL) {
+  const query = url.searchParams.get("query") || url.searchParams.get("q") || "";
+  if (query && !pointFromCoordinate(query)) return decodePlace(query);
+  const marker = "/maps/place/";
+  const index = url.pathname.indexOf(marker);
+  if (index < 0) return "目的地";
+  return decodePlace(url.pathname.slice(index + marker.length).split("/")[0] || "") || "目的地";
+}
+
+function extractSingleDestination(url: URL): Point | null {
+  const text = decodePlace(url.toString());
+  const dataMatch = text.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  if (dataMatch) return pointFromCoordinate(`${dataMatch[1]},${dataMatch[2]}`, extractPlaceLabel(url));
+  const atMatch = text.match(/\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  if (atMatch) return pointFromCoordinate(`${atMatch[1]},${atMatch[2]}`, extractPlaceLabel(url));
+  const query = url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("destination") || "";
+  return pointFromCoordinate(query, extractPlaceLabel(url));
+}
+
 async function geocode(place: string): Promise<Point> {
   const coordinate = pointFromCoordinate(place, place);
   if (coordinate) return coordinate;
@@ -140,6 +159,7 @@ Deno.serve(async (request) => {
   try {
     const body = await request.json();
     const input = String(body?.url || "").trim();
+    const startInput = String(body?.start || "").trim().slice(0, 120);
     if (!input || input.length > 4096) return json({ error: "Googleマップのリンクを貼り付けてください" }, 400);
 
     let url: URL;
@@ -153,12 +173,17 @@ Deno.serve(async (request) => {
     }
 
     const resolved = await expandGoogleUrl(url);
-    const placeNames = extractPlaces(resolved);
+    let placeNames = extractPlaces(resolved);
     let points = extractEmbeddedCoordinates(resolved);
     if (points.length < 2) points = await Promise.all(placeNames.slice(0, 10).map(geocode));
+    if (points.length < 2 && startInput) {
+      const destination = points[0] || extractSingleDestination(resolved) || await geocode(extractPlaceLabel(resolved));
+      points = [await geocode(startInput), destination];
+      placeNames = [startInput, destination.name || extractPlaceLabel(resolved)];
+    }
     points = deduplicate(points);
     if (points.length < 2) {
-      return json({ error: "目的地だけのリンクではなく、出発地から目的地までの経路を共有してください" }, 422);
+      return json({ error: "このリンクは店・施設など場所だけのリンクです。画面の「出発地」を入力して、もう一度ルートを確認してください" }, 422);
     }
     if (points.length > 10) return json({ error: "経由地は8か所以内にしてください" }, 422);
 
