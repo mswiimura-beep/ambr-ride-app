@@ -83,9 +83,11 @@ function extractPlaces(url: URL) {
   const marker = "/maps/dir/";
   const index = url.pathname.indexOf(marker);
   if (index < 0) return [];
-  return url.pathname.slice(index + marker.length).split("/")
-    .map(decodePlace)
-    .filter((part) => part && !part.startsWith("data=") && !part.startsWith("@") && part !== "maps");
+  const parts = url.pathname.slice(index + marker.length).split("/").map(decodePlace);
+  // /@... 以降は am=t や data=... などGoogleマップの表示設定で、経由地ではない。
+  const settingsIndex = parts.findIndex((part) => part.startsWith("@") || part.startsWith("data="));
+  return (settingsIndex >= 0 ? parts.slice(0, settingsIndex) : parts)
+    .filter((part) => part && part !== "maps");
 }
 
 function extractPlaceLabel(url: URL) {
@@ -123,6 +125,16 @@ function extractSingleDestination(url: URL): Point | null {
   const atMatch = text.match(/\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
   if (atMatch) return pointFromCoordinate(`${atMatch[1]},${atMatch[2]}`, extractPlaceLabel(url));
   return null;
+}
+
+function extractExplicitRoutePoints(url: URL, placeNames: string[]) {
+  const text = decodePlace(url.toString());
+  const matches = [...text.matchAll(/!2m2!1d(-?\d+(?:\.\d+)?)!2d(-?\d+(?:\.\d+)?)/g)];
+  const points = matches.map((match, index) =>
+    pointFromCoordinate(`${match[2]},${match[1]}`, placeNames[index] || "経由地")
+  ).filter((point): point is Point => !!point);
+  // Googleマップが各経路地点に付けた座標が、明示された地点数と一致するときだけ使用する。
+  return points.length >= 2 && points.length === placeNames.length ? points : [];
 }
 
 async function geocode(place: string): Promise<Point> {
@@ -200,15 +212,19 @@ Deno.serve(async (request) => {
     const resolved = await expandGoogleUrl(url);
     let placeNames = extractPlaces(resolved);
     let points: Point[] = [];
-    // Google Mapsのdata部分には画面中心や周辺施設の座標も入るため、経路地点には使わない。
     if (placeNames.length >= 2) {
-      const explicit = await resolveExplicitPlaces(placeNames);
-      if (explicit.failedPlace) {
-        return json({
-          error: `明示された「${explicit.failedPlace}」の場所を確認できませんでした。Googleマップで出発地と目的地を設定し直して共有してください`,
-        }, 422);
+      // !2m2!1d経度!2d緯度 は各経路地点に結び付いた座標。画面中心の /@... や
+      // 周辺施設の !3d...!4d... と区別し、名称検索より優先する。
+      points = extractExplicitRoutePoints(resolved, placeNames);
+      if (points.length < 2) {
+        const explicit = await resolveExplicitPlaces(placeNames);
+        if (explicit.failedPlace) {
+          return json({
+            error: `明示された「${explicit.failedPlace}」の場所を確認できませんでした。Googleマップで出発地と目的地を設定し直して共有してください`,
+          }, 422);
+        }
+        points = explicit.points;
       }
-      points = explicit.points;
     }
     if (points.length < 2 && startInput) {
       const destinationLabel = placeNames.at(-1) || extractPlaceLabel(resolved);
