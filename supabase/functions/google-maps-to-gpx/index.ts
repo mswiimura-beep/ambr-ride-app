@@ -88,18 +88,6 @@ function extractPlaces(url: URL) {
     .filter((part) => part && !part.startsWith("data=") && !part.startsWith("@") && part !== "maps");
 }
 
-function extractEmbeddedCoordinates(url: URL): Point[] {
-  const points: Point[] = [];
-  const text = decodePlace(url.toString());
-  const pattern = /!1d(-?\d+(?:\.\d+)?)!2d(-?\d+(?:\.\d+)?)/g;
-  for (const match of text.matchAll(pattern)) {
-    const lon = Number(match[1]);
-    const lat = Number(match[2]);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) points.push({ lat, lon, name: "経由地" });
-  }
-  return points;
-}
-
 function extractPlaceLabel(url: URL) {
   const query = url.searchParams.get("query") || url.searchParams.get("q") ||
     url.searchParams.get("destination") || "";
@@ -126,12 +114,15 @@ async function tryGeocode(place: string) {
 
 function extractSingleDestination(url: URL): Point | null {
   const text = decodePlace(url.toString());
-  const dataMatch = text.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  const query = url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("destination") || "";
+  const queryPoint = pointFromCoordinate(query, extractPlaceLabel(url));
+  if (queryPoint) return queryPoint;
+  const dataMatches = [...text.matchAll(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/g)];
+  const dataMatch = dataMatches.at(-1);
   if (dataMatch) return pointFromCoordinate(`${dataMatch[1]},${dataMatch[2]}`, extractPlaceLabel(url));
   const atMatch = text.match(/\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
   if (atMatch) return pointFromCoordinate(`${atMatch[1]},${atMatch[2]}`, extractPlaceLabel(url));
-  const query = url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("destination") || "";
-  return pointFromCoordinate(query, extractPlaceLabel(url));
+  return null;
 }
 
 async function geocode(place: string): Promise<Point> {
@@ -159,6 +150,25 @@ function deduplicate(points: Point[]) {
     const previous = points[index - 1];
     return !previous || Math.abs(point.lat - previous.lat) > 0.00001 || Math.abs(point.lon - previous.lon) > 0.00001;
   });
+}
+
+function pointDistanceKm(a: Point, b: Point) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const dLat = radians(b.lat - a.lat);
+  const dLon = radians(b.lon - a.lon);
+  const value = Math.sin(dLat / 2) ** 2 +
+    Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+async function resolveExplicitPlaces(placeNames: string[]) {
+  const points: Point[] = [];
+  for (const place of placeNames.slice(0, 10)) {
+    const point = await tryGeocode(place);
+    if (!point) return { points: [], failedPlace: place };
+    points.push(point);
+  }
+  return { points, failedPlace: "" };
 }
 
 function escapeXml(value: string) {
@@ -189,13 +199,20 @@ Deno.serve(async (request) => {
 
     const resolved = await expandGoogleUrl(url);
     let placeNames = extractPlaces(resolved);
-    let points = extractEmbeddedCoordinates(resolved);
-    if (points.length < 2 && placeNames.length >= 2) {
-      points = await Promise.all(placeNames.slice(0, 10).map(geocode));
+    let points: Point[] = [];
+    // Google Mapsのdata部分には画面中心や周辺施設の座標も入るため、経路地点には使わない。
+    if (placeNames.length >= 2) {
+      const explicit = await resolveExplicitPlaces(placeNames);
+      if (explicit.failedPlace) {
+        return json({
+          error: `明示された「${explicit.failedPlace}」の場所を確認できませんでした。Googleマップで出発地と目的地を設定し直して共有してください`,
+        }, 422);
+      }
+      points = explicit.points;
     }
     if (points.length < 2 && startInput) {
       const destinationLabel = placeNames.at(-1) || extractPlaceLabel(resolved);
-      const destination = points[0] || extractSingleDestination(resolved) || await tryGeocode(destinationLabel);
+      const destination = extractSingleDestination(resolved) || await tryGeocode(destinationLabel);
       if (!destination) {
         return json({
           error: "このリンクから目的地を読み取れませんでした。Googleマップで店・施設を開き、「共有」→「リンクをコピー」をやり直してください",
@@ -224,6 +241,25 @@ Deno.serve(async (request) => {
       throw new Error("この出発地・目的地では道路ルートを作成できませんでした");
     }
 
+    const routeStart: Point = {
+      lon: Number(routeCoordinates[0][0]),
+      lat: Number(routeCoordinates[0][1]),
+      name: points[0].name,
+    };
+    const routeEnd: Point = {
+      lon: Number(routeCoordinates.at(-1)[0]),
+      lat: Number(routeCoordinates.at(-1)[1]),
+      name: points.at(-1)!.name,
+    };
+    const startGapKm = pointDistanceKm(points[0], routeStart);
+    const endGapKm = pointDistanceKm(points.at(-1)!, routeEnd);
+    if (startGapKm > 10 || endGapKm > 10) {
+      const side = startGapKm > 10 ? "出発地" : "目的地";
+      return json({
+        error: `${side}と作成された道路ルートが一致しませんでした。Googleマップの共有リンクを作り直してください`,
+      }, 422);
+    }
+
     const names = placeNames.length >= 2 ? placeNames : points.map((point) => point.name);
     const routeName = `${names[0] || "出発地"} → ${names.at(-1) || "目的地"}`.slice(0, 80);
     const trackPoints = routeCoordinates.map(([lon, lat]: [number, number]) =>
@@ -238,6 +274,8 @@ Deno.serve(async (request) => {
       durationMinutes: Math.round(Number(route.duration) / 60),
       pointsCount: routeCoordinates.length,
       resolvedUrl: resolved.toString(),
+      startPoint: { lat: points[0].lat, lon: points[0].lon, name: points[0].name },
+      endPoint: { lat: points.at(-1)!.lat, lon: points.at(-1)!.lon, name: points.at(-1)!.name },
       source: "google-maps-plan",
     });
   } catch (error) {
