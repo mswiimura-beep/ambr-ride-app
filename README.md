@@ -11,6 +11,7 @@
 - `guide.html` — 初めて使う人向け説明書
 - `supabase/functions/google-maps-to-gpx/` — Googleマップ共有リンクを予定ルートGPXへ変換するEdge Function
 - `supabase/migrations/20260825000100_require_permanent_community_writers.sql` — 「みんなの投稿」の匿名書き込みを拒否する未適用のRLS／Storage案
+- `tests/` — GPX導線、共有地図、Google短縮URLと始点・終点検査のローカルテスト
 - `README.md` — この管理用メモ
 
 アプリは1ページ構成で、GitHub Pagesから公開しています。投稿、写真、イベント、参加・合流予定の共有にはSupabaseを使用します。Googleマップの短縮URL展開とGPX変換にはSupabase Edge Function、道路ルートの再計算にはOSRMを使用します。現在地周辺の天気にはOpen-Meteoを使用し、位置情報は天気取得にだけ利用して保存しません。名前とアイコン、完走記録は利用者の端末内に保存され、完走記録へ連動した元のGPXファイルはIndexedDBに保存されます。
@@ -28,6 +29,8 @@
 ## ローカル確認
 
 `npm test` で、HTML内JavaScriptの構文と共有データ処理の重要な安全条件を確認できます。Migrationはテスト実行だけでは本番へ適用されません。
+
+テストは外部サービスへ書き込まず、短縮URLや道路ルートの応答をローカルで再現します。
 
 みんなの投稿まわりの構文・写真選択・作成／編集／削除の確認処理は、`node tests/community-posts.test.mjs` で確認できます。
 

@@ -21,6 +21,11 @@ function isGoogleMapsUrl(url: URL) {
     host === "google.co.jp" || host.endsWith(".google.co.jp");
 }
 
+function isGoogleShortUrl(url: URL) {
+  const host = url.hostname.toLowerCase();
+  return host === "maps.app.goo.gl" || host === "goo.gl";
+}
+
 function decodePlace(value: string) {
   try {
     return decodeURIComponent(value.replace(/\+/g, " ")).trim();
@@ -53,22 +58,40 @@ async function expandGoogleUrl(input: URL) {
   let current = input;
   for (let count = 0; count < 6; count++) {
     if (!isGoogleMapsUrl(current)) throw new Error("Googleマップ以外のリンクには移動できません");
-    const response = await fetchWithTimeout(current.toString(), {
-      method: "GET",
-      redirect: "manual",
-      headers: { "User-Agent": "AMBR-Ride-App/1.0" },
-    });
+    let response: Response;
+    try {
+      response = await fetchWithTimeout(current.toString(), {
+        method: "GET",
+        redirect: "manual",
+        headers: { "User-Agent": "AMBR-Ride-App/1.0" },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") throw error;
+      if (isGoogleShortUrl(current)) {
+        throw new Error("Googleマップの短縮リンクを開けませんでした。通信状態を確認するか、Googleマップの「共有」からリンクをコピーし直してください");
+      }
+      throw error;
+    }
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
-      if (!location) break;
+      if (!location) {
+        throw new Error("Googleマップの短縮リンクの移動先がありません。Googleマップの「共有」からリンクをコピーし直してください");
+      }
       current = new URL(location, current);
       continue;
     }
+    if (!response.ok) {
+      const target = isGoogleShortUrl(current) ? "短縮リンク" : "共有リンク";
+      throw new Error(`Googleマップの${target}を開けませんでした（HTTP ${response.status}）。Googleマップの「共有」からリンクをコピーし直してください`);
+    }
     const finalUrl = new URL(response.url || current.toString());
     if (!isGoogleMapsUrl(finalUrl)) throw new Error("Googleマップ以外のリンクには移動できません");
+    if (isGoogleShortUrl(finalUrl)) {
+      throw new Error("Googleマップの短縮リンクを展開できませんでした。Googleマップの「共有」から新しいリンクをコピーしてください");
+    }
     return finalUrl;
   }
-  return current;
+  throw new Error("Googleマップの短縮リンクの移動回数が多すぎます。Googleマップの「共有」から新しいリンクをコピーしてください");
 }
 
 function extractPlaces(url: URL) {
@@ -301,3 +324,5 @@ Deno.serve(async (request) => {
     return json({ error: message }, 500);
   }
 });
+
+export { expandGoogleUrl, extractExplicitRoutePoints, extractPlaces, isGoogleMapsUrl, pointDistanceKm, pointFromCoordinate };
