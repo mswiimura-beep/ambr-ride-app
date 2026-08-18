@@ -37,3 +37,7 @@
 みんなの投稿まわりの構文・写真選択・作成／編集／削除の確認処理は、`node tests/community-posts.test.mjs` で確認できます。
 
 本番反映前に `supabase/schema_audit.sql` を読み取り専用で実行し、問題件数が0であること、既存Storage policyが `midway-photos` へ広い書込権限を与えていないことを確認してください。その後、バックアップを取得してMigrationをレビューします。
+
+### モバイルUI検査
+
+`npm install` のあと `npm run test:mobile` を実行すると、初回入口、共通ナビ、メニューへ戻る操作、モーダルのフォーカス、キーボード相当の短い画面、横スクロール、44px以上の押下領域を自動検査します。対象viewportは 320x568、375x667、375x500、375x420、393x852、667x375 です。
