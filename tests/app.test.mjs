@@ -24,6 +24,13 @@ test('removed route-comparison features stay removed', () => {
   }
 });
 
+test('retired 3D playback and video dependencies stay removed', () => {
+  for (const removed of ['maplibre-gl', 'route3d', '3D再生', '動画を保存', 'MediaRecorder']) {
+    assert.equal(html.includes(removed), false, `${removed} must not be present`);
+  }
+  assert.equal(guide.includes('3D'), false);
+});
+
 test('shared map explains identity, route kind, direction and tile fallback', () => {
   for (const expected of ['自分・実走', '自分・予定', 'ほかの人・実走', 'ほかの人・予定', 'trail-flow', 'addResilientTiles']) {
     assert.ok(html.includes(expected), `${expected} should be present`);
