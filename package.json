@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:browser-server": "node tests/browser-server.mjs",
-    "test:mobile": "node tests/mobile-ui-check.cjs"
+    "test:mobile": "node tests/mobile-ui-check.cjs",
+    "test:external:readonly": "node tests/external-readonly-check.cjs"
   },
   "devDependencies": {
     "playwright": "^1.62.1"

@@ -14,9 +14,28 @@ const viewports = [
   { width: 393, height: 852 },
   { width: 667, height: 375 },
 ];
+const modalViewports = [
+  { width: 320, height: 568 },
+  { width: 375, height: 420 },
+  { width: 667, height: 375 },
+];
+const modalIds = [
+  'midwayPostModal',
+  'rideFormModal',
+  'eventFormModal',
+  'eventDetailModal',
+  'eventJoinModal',
+  'profileModal',
+  'midwayGalleryModal',
+  'midwayMapModal',
+  'rideModal',
+  'route3dModal',
+  'weatherModal',
+];
 
 function serveFile(request, response) {
-  const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
+  const requestUrl = new URL(request.url, 'http://127.0.0.1');
+  const pathname = requestUrl.pathname;
   const relative = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   const file = path.resolve(root, relative);
   if (!file.startsWith(root + path.sep)) {
@@ -46,6 +65,16 @@ function serveFile(request, response) {
         .replace(/<link[^>]+href="https:\/\/[^\"]+"[^>]*>/g, '')
         .replace(/<script src="https:\/\/[^\"]+"><\/script>/g, '');
       html = html.replace('<script>', `<script>${supabaseStub}</script><script>`);
+      const requestedModal = requestUrl.searchParams.get('open-modal');
+      if (modalIds.includes(requestedModal)) {
+        const autoOpen = `<script>addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => {
+            document.getElementById('enterButton').click();
+            setTimeout(() => window.openModal(${JSON.stringify(requestedModal)}), 500);
+          }, 0);
+        });</script>`;
+        html = html.replace('</body>', `${autoOpen}</body>`);
+      }
       body = Buffer.from(html);
     }
     const type = file.endsWith('.html') ? 'text/html; charset=utf-8' : 'application/octet-stream';
@@ -74,11 +103,64 @@ async function metrics(page) {
   });
 }
 
+async function checkModalMatrix(page, baseUrl) {
+  const results = [];
+  for (const viewport of modalViewports) {
+    await page.setViewportSize(viewport);
+    await page.goto(`${baseUrl}/?modal-matrix=${viewport.width}x${viewport.height}`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#enterButton').click();
+    await page.waitForTimeout(480);
+    for (const modalId of modalIds) {
+      await page.evaluate((id) => window.openModal(id), modalId);
+      await page.waitForTimeout(30);
+      const state = await page.evaluate((id) => {
+        const modal = document.getElementById(id);
+        const sheet = modal.firstElementChild;
+        const rect = sheet.getBoundingClientRect();
+        const focusables = [...modal.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+          .filter((element) => !element.hidden && element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length);
+        const undersized = focusables.filter((element) => {
+          if (/^(INPUT|SELECT|TEXTAREA)$/.test(element.tagName)) return false;
+          const target = element.getBoundingClientRect();
+          return target.width < 44 || target.height < 44;
+        }).map((element) => ({ tag: element.tagName, id: element.id, className: element.className, text: element.textContent.trim().slice(0, 30) }));
+        return {
+          open: modal.classList.contains('open'),
+          ariaHidden: modal.getAttribute('aria-hidden'),
+          appInert: document.querySelector('.app').hasAttribute('inert'),
+          focusInside: modal.contains(document.activeElement),
+          sheet: { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, scrollHeight: sheet.scrollHeight, clientHeight: sheet.clientHeight, overflowY: getComputedStyle(sheet).overflowY },
+          documentWidth: document.documentElement.scrollWidth,
+          undersized,
+        };
+      }, modalId);
+      assert.equal(state.open, true, `${modalId} did not open at ${viewport.width}x${viewport.height}`);
+      assert.equal(state.ariaHidden, 'false', `${modalId} is hidden from assistive technology`);
+      assert.equal(state.appInert, true, `${modalId} did not make the background inert`);
+      assert.equal(state.focusInside, true, `${modalId} did not contain initial focus`);
+      assert.equal(state.documentWidth, viewport.width, `${modalId} caused horizontal page overflow`);
+      assert.ok(state.sheet.top >= 0 && state.sheet.bottom <= viewport.height, `${modalId} is outside the viewport`);
+      assert.ok(state.sheet.left >= 0 && state.sheet.right <= viewport.width, `${modalId} overflows horizontally`);
+      assert.equal(state.undersized.length, 0, `${modalId} has controls below 44px: ${JSON.stringify(state.undersized)}`);
+      if (state.sheet.overflowY === 'hidden') {
+        assert.ok(state.sheet.scrollHeight <= state.sheet.clientHeight + 1, `${modalId} clips content in a non-scrollable sheet`);
+      }
+      await page.locator(`#${modalId} button:not([disabled]),#${modalId} a[href],#${modalId} input:not([disabled]),#${modalId} select:not([disabled]),#${modalId} textarea:not([disabled])`).last().press('Tab');
+      assert.equal(await page.evaluate((id) => document.getElementById(id).contains(document.activeElement), modalId), true, `Tab escaped ${modalId}`);
+      await page.evaluate((id) => window.hideModal(id), modalId);
+      results.push({ modalId, viewport });
+    }
+  }
+  return results;
+}
+
 async function run() {
   const server = http.createServer(serveFile);
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
-  const browserCandidates = [
+  const browserCandidates = process.env.PLAYWRIGHT_BROWSERS_PATH ? [
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
+  ].filter(Boolean) : [
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
@@ -89,12 +171,13 @@ async function run() {
   page.setDefaultTimeout(10000);
   await page.route('https://**/*', (route) => route.abort());
   const results = [];
+  const baseUrl = `http://127.0.0.1:${port}`;
 
   try {
     for (const viewport of viewports) {
       console.log(`checking ${viewport.width}x${viewport.height}`);
       await page.setViewportSize(viewport);
-      await page.goto(`http://127.0.0.1:${port}/?viewport=${viewport.width}x${viewport.height}`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${baseUrl}/?viewport=${viewport.width}x${viewport.height}`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(80);
       const entry = await metrics(page);
       assert.equal(entry.documentWidth, viewport.width, `${viewport.width}x${viewport.height}: horizontal overflow at entry`);
@@ -129,7 +212,7 @@ async function run() {
 
     await page.setViewportSize({ width: 375, height: 500 });
     console.log('checking navigation and modal behavior');
-    await page.goto(`http://127.0.0.1:${port}/?interaction=1`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${baseUrl}/?interaction=1`, { waitUntil: 'domcontentloaded' });
     await page.locator('#enterButton').click();
     await page.waitForTimeout(480);
     for (const view of ['mapView', 'trailsView', 'ridesView', 'feedView', 'menuView']) {
@@ -167,14 +250,24 @@ async function run() {
     await page.locator('#rideFormModal .entry-cancel').press('Tab');
     assert.equal(await page.evaluate(() => document.getElementById('rideFormModal').contains(document.activeElement)), true, 'Tab escaped the open modal');
 
-    console.log(JSON.stringify({ passed: true, viewports: results.map((item) => item.viewport) }, null, 2));
+    console.log('checking all modal layouts and focus traps');
+    const modalResults = await checkModalMatrix(page, baseUrl);
+
+    console.log(JSON.stringify({ passed: true, viewports: results.map((item) => item.viewport), modalChecks: modalResults.length }, null, 2));
   } finally {
     await browser.close();
     await new Promise((resolve) => server.close(resolve));
   }
 }
 
-run().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv.includes('--serve')) {
+  const port = Number(process.env.PORT || 4319);
+  http.createServer(serveFile).listen(port, '127.0.0.1', () => {
+    console.log(`AMBR UI test server: http://127.0.0.1:${port}`);
+  });
+} else {
+  run().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

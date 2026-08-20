@@ -1,1 +1,3 @@
 .private-backups/
+node_modules/
+.playwright-browsers/

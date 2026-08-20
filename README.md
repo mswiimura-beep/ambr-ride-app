@@ -40,4 +40,15 @@
 
 ### モバイルUI検査
 
-`npm install` のあと `npm run test:mobile` を実行すると、初回入口、共通ナビ、メニューへ戻る操作、モーダルのフォーカス、キーボード相当の短い画面、横スクロール、44px以上の押下領域を自動検査します。対象viewportは 320x568、375x667、375x500、375x420、393x852、667x375 です。
+`npm install` のあと `npm run test:mobile` を実行すると、初回入口、共通ナビ、メニューへ戻る操作、全11モーダルのフォーカス、キーボード相当の短い画面、横スクロール、44px以上の押下領域を自動検査します。対象viewportは 320x568、375x667、375x500、375x420、393x852、667x375 です。全モーダルは 320x568、375x420、667x375 で検査します。
+
+Playwright用ブラウザをプロジェクト内だけへ用意する場合は、次を実行します。
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers npx playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers npm run test:mobile
+```
+
+`npm run test:external:readonly` は、Open-Meteo、OpenStreetMap、Supabase RESTの認可境界、`google-maps-to-gpx`のCORS応答を読み取り専用で検査します。投稿、認証ユーザー、GPXなどの本番データは作成・変更しません。
+
+実機iPhoneでは、Safariで入口を押したあと、縦向きと横向きの両方で下部ナビ、右上プロフィール、記録フォームを開きます。フォーム入力中に表示が拡大しないこと、キーボード表示中も閉じる操作へスクロールできること、回転後に画面外や横スクロールがないことを公開前に確認してください。
