@@ -19,7 +19,18 @@ begin
   if missing_table is not null then
     raise exception 'Required AMBR table is missing: %', missing_table;
   end if;
+end $$;
 
+alter table public.midway_posts
+  add column if not exists updated_at timestamptz not null default now();
+alter table public.midway_post_comments
+  add column if not exists client_comment_id uuid;
+alter table public.events
+  add column if not exists client_event_id uuid,
+  add column if not exists updated_at timestamptz not null default now();
+
+do $$
+begin
   if exists (select 1 from public.midway_posts where user_id is null)
      or exists (select 1 from public.midway_post_reactions where user_id is null)
      or exists (select 1 from public.midway_post_comments where user_id is null)
@@ -30,6 +41,8 @@ begin
   end if;
   if exists (select 1 from public.midway_posts group by user_id, client_post_id having count(*) > 1)
      or exists (select 1 from public.midway_post_reactions group by post_id, user_id, reaction having count(*) > 1)
+     or exists (select 1 from public.midway_post_comments where client_comment_id is not null group by user_id, client_comment_id having count(*) > 1)
+     or exists (select 1 from public.events where client_event_id is not null group by creator_id, client_event_id having count(*) > 1)
      or exists (select 1 from public.event_participants group by event_id, user_id having count(*) > 1)
      or exists (select 1 from public.shared_routes group by user_id, client_ride_id having count(*) > 1) then
     raise exception 'Duplicate identity rows exist. Resolve them manually before adding uniqueness constraints.';
@@ -58,6 +71,14 @@ begin
   if not exists (select 1 from pg_constraint where conname = 'midway_post_reactions_identity_key') then
     alter table public.midway_post_reactions
       add constraint midway_post_reactions_identity_key unique (post_id, user_id, reaction);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'midway_comments_user_client_key') then
+    alter table public.midway_post_comments
+      add constraint midway_comments_user_client_key unique (user_id, client_comment_id);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'events_creator_client_key') then
+    alter table public.events
+      add constraint events_creator_client_key unique (creator_id, client_event_id);
   end if;
   if not exists (select 1 from pg_constraint where conname = 'event_participants_identity_key') then
     alter table public.event_participants
@@ -120,7 +141,9 @@ end $$;
 create index if not exists midway_posts_created_at_idx on public.midway_posts (created_at desc);
 create index if not exists midway_post_reactions_post_idx on public.midway_post_reactions (post_id);
 create index if not exists midway_post_comments_post_created_idx on public.midway_post_comments (post_id, created_at desc);
+create index if not exists midway_post_comments_client_idx on public.midway_post_comments (user_id, client_comment_id);
 create index if not exists events_date_time_idx on public.events (event_date, start_time);
+create index if not exists events_creator_client_idx on public.events (creator_id, client_event_id);
 create index if not exists event_participants_event_idx on public.event_participants (event_id);
 create index if not exists shared_routes_updated_idx on public.shared_routes (updated_at desc);
 
@@ -213,10 +236,10 @@ create policy ambr_midway_photos_read on storage.objects for select to authentic
 create policy ambr_midway_photos_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'midway-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy ambr_midway_photos_update on storage.objects for update to authenticated
-  using (bucket_id = 'midway-photos' and owner_id = auth.uid()::text)
+  using (bucket_id = 'midway-photos' and (storage.foldername(name))[1] = auth.uid()::text)
   with check (bucket_id = 'midway-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy ambr_midway_photos_delete on storage.objects for delete to authenticated
-  using (bucket_id = 'midway-photos' and owner_id = auth.uid()::text);
+  using (bucket_id = 'midway-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- Existing generic storage.objects policies are intentionally not removed here
 -- because they may serve other buckets. Review schema_audit.sql output and remove
