@@ -35,6 +35,31 @@ where (schemaname = 'public' and tablename in (
    or (schemaname = 'storage' and tablename = 'objects')
 order by schemaname, tablename, policyname;
 
+select n.nspname as schema_name, c.relname as table_name,
+       c.relrowsecurity as rls_enabled, c.relforcerowsecurity as rls_forced
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where (n.nspname = 'public' and c.relname in (
+    'midway_posts', 'midway_post_reactions', 'midway_post_comments',
+    'events', 'event_participants', 'shared_routes'
+  ))
+   or (n.nspname = 'storage' and c.relname = 'objects')
+order by n.nspname, c.relname;
+
+select id, name, public, file_size_limit, allowed_mime_types
+from storage.buckets
+where id = 'midway-photos';
+
+-- Review every returned Storage write policy manually. A policy is unsafe for
+-- this app if INSERT/UPDATE/DELETE is granted broadly without both the bucket
+-- check and an auth.uid()-bound object prefix/ownership check.
+select policyname, roles, cmd, qual, with_check
+from pg_policies
+where schemaname = 'storage'
+  and tablename = 'objects'
+  and cmd in ('INSERT', 'UPDATE', 'DELETE', 'ALL')
+order by policyname;
+
 select grantee, table_name, privilege_type
 from information_schema.role_table_grants
 where table_schema = 'public'

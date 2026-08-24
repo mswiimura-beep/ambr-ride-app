@@ -7,6 +7,16 @@ const migration = readFileSync(
   new URL('../supabase/migrations/20260818000100_shared_data_reliability.sql', import.meta.url),
   'utf8',
 );
+const mergeMigration = readFileSync(
+  new URL('../supabase/migrations/20260825000100_anonymous_owner_merge.sql', import.meta.url),
+  'utf8',
+);
+const mergeFunction = readFileSync(
+  new URL('../supabase/functions/merge-anonymous-owner/index.ts', import.meta.url),
+  'utf8',
+);
+const rollout = readFileSync(new URL('../supabase/PRODUCTION_ROLLOUT.md', import.meta.url), 'utf8');
+const functionConfig = readFileSync(new URL('../supabase/config.toml', import.meta.url), 'utf8');
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map((match) => match[1])
   .filter((source) => source.trim());
@@ -75,8 +85,63 @@ test('owners can edit posts and events without changing ownership', () => {
 test('anonymous ownership can be linked to and restored from email', () => {
   assert.match(html, /auth\.updateUser\(\{email\}/);
   assert.match(html, /auth\.signInWithOtp\(\{email,options:\{shouldCreateUser:false/);
-  assert.match(html, /midwayUser\?\.is_anonymous&&ownsCurrentData/);
+  assert.match(html, /if\(!user\.is_anonymous\)throw new Error\('source must be anonymous'\)/);
   assert.match(html, /detectSessionInUrl:true/);
+  assert.match(html, /persistSession:false,autoRefreshToken:false,detectSessionInUrl:false/);
+  assert.match(html, /auth\.verifyOtp\(\{email,token,type:'email'\}\)/);
+  assert.match(html, /sourceAccessToken:ownershipMergeSourceToken/);
+  assert.match(html, /auth\.setSession\(\{access_token:targetSession\.access_token/);
+  assert.doesNotMatch(html, /SERVICE_ROLE/i);
+});
+
+test('anonymous sign-in and existing-email OTP support Turnstile tokens', () => {
+  assert.match(html, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
+  assert.match(html, /signInAnonymously\(captchaToken\?\{options:\{captchaToken\}\}:undefined\)/);
+  assert.match(html, /signInWithOtp\(\{email,options:\{shouldCreateUser:false,\.\.\.\(captchaToken\?\{captchaToken\}:\{\}\)\}\}\)/);
+  assert.match(html, /TURNSTILE_SITE_KEY\?120000:20000/);
+});
+
+test('server-side merge derives both owners from verified tokens', () => {
+  assert.match(mergeFunction, /auth\.getUser\(sourceAccessToken\)/);
+  assert.match(mergeFunction, /auth\.getUser\(targetAccessToken\)/);
+  assert.match(mergeFunction, /if \(!sourceUser\.is_anonymous\)/);
+  assert.match(mergeFunction, /if \(targetUser\.is_anonymous\)/);
+  assert.match(mergeFunction, /source_user: sourceUser\.id/);
+  assert.match(mergeFunction, /target_user: targetUser\.id/);
+  assert.doesNotMatch(mergeFunction, /body\?\.(sourceUserId|targetUserId)/);
+  assert.match(mergeFunction, /Origin not allowed/);
+  assert.doesNotMatch(mergeFunction, /Access-Control-Allow-Origin"\s*:\s*"\*"/);
+  assert.match(mergeFunction, /Unexpected server failure/);
+  assert.match(mergeFunction, /rawBody\.length > 16_384/);
+  assert.match(mergeFunction, /sourceAccountRetainedForAudit: true/);
+  assert.doesNotMatch(mergeFunction, /deleteUser\(/);
+  assert.match(functionConfig, /verify_jwt\s*=\s*true/);
+});
+
+test('merge RPC is service-only, transactional, race-safe, and idempotent', () => {
+  assert.match(mergeMigration, /revoke all on function public\.merge_anonymous_user_data\(uuid, uuid\) from public, anon, authenticated/);
+  assert.match(mergeMigration, /grant execute on function public\.merge_anonymous_user_data\(uuid, uuid\) to service_role/);
+  assert.match(mergeMigration, /users\.is_anonymous is true/);
+  assert.match(mergeMigration, /users\.is_anonymous is false/);
+  assert.match(mergeMigration, /pg_advisory_xact_lock/);
+  assert.match(mergeMigration, /lock table[\s\S]+storage\.objects in share row exclusive mode/);
+  assert.match(mergeMigration, /'alreadyMerged', true/);
+  assert.match(mergeMigration, /ambr_owner_active\(auth\.uid\(\)\)/);
+  assert.match(mergeMigration, /ambr_can_manage_storage_prefix/);
+  assert.match(mergeMigration, /delete from public\.midway_post_reactions[\s\S]+target\.reaction = source\.reaction/);
+  assert.match(mergeMigration, /delete from public\.event_participants[\s\S]+target\.event_id = source\.event_id/);
+});
+
+test('production rollout is gated by audit, backup restore, and Auth settings', () => {
+  assert.match(rollout, /schema_audit\.sql/);
+  assert.match(rollout, /supabase db dump/);
+  assert.match(rollout, /使い捨て\/検証用プロジェクトへ/);
+  assert.match(rollout, /Storageの実ファイル本体は含まれません/);
+  assert.match(rollout, /Allow manual linking/);
+  assert.match(rollout, /\{\{ \.Token \}\}/);
+  assert.match(rollout, /Redirect URLs/);
+  assert.match(rollout, /Bot and Abuse Protection/);
+  assert.match(rollout, /--no-verify-jwt/);
 });
 
 test('migration enforces authenticated reads and owner writes', () => {
