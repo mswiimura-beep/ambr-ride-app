@@ -29,7 +29,7 @@ as $$
     );
 $$;
 
-revoke all on function public.ambr_owner_active(uuid) from public;
+revoke all on function public.ambr_owner_active(uuid) from public, anon, authenticated;
 grant execute on function public.ambr_owner_active(uuid) to authenticated, service_role;
 
 -- A merged post keeps its original object key (source-user-id/...).  Keep a
@@ -51,7 +51,7 @@ as $$
     );
 $$;
 
-revoke all on function public.ambr_can_manage_storage_prefix(text, uuid) from public;
+revoke all on function public.ambr_can_manage_storage_prefix(text, uuid) from public, anon, authenticated;
 grant execute on function public.ambr_can_manage_storage_prefix(text, uuid) to authenticated, service_role;
 
 create or replace function public.merge_anonymous_user_data(source_user uuid, target_user uuid)

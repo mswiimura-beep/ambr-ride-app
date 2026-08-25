@@ -211,7 +211,6 @@ declare
 begin
   foreach sequence_name in array array[
     pg_get_serial_sequence('public.midway_posts', 'id'),
-    pg_get_serial_sequence('public.midway_post_reactions', 'id'),
     pg_get_serial_sequence('public.midway_post_comments', 'id'),
     pg_get_serial_sequence('public.events', 'id'),
     pg_get_serial_sequence('public.shared_routes', 'id')

@@ -95,6 +95,7 @@ test('anonymous ownership can be linked to and restored from email', () => {
 });
 
 test('anonymous sign-in and existing-email OTP support Turnstile tokens', () => {
+  assert.match(html, /ambr-turnstile-site-key" content="0x4A/);
   assert.match(html, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
   assert.match(html, /signInAnonymously\(captchaToken\?\{options:\{captchaToken\}\}:undefined\)/);
   assert.match(html, /signInWithOtp\(\{email,options:\{shouldCreateUser:false,\.\.\.\(captchaToken\?\{captchaToken\}:\{\}\)\}\}\)/);
@@ -119,6 +120,8 @@ test('server-side merge derives both owners from verified tokens', () => {
 });
 
 test('merge RPC is service-only, transactional, race-safe, and idempotent', () => {
+  assert.match(mergeMigration, /revoke all on function public\.ambr_owner_active\(uuid\) from public, anon, authenticated/);
+  assert.match(mergeMigration, /revoke all on function public\.ambr_can_manage_storage_prefix\(text, uuid\) from public, anon, authenticated/);
   assert.match(mergeMigration, /revoke all on function public\.merge_anonymous_user_data\(uuid, uuid\) from public, anon, authenticated/);
   assert.match(mergeMigration, /grant execute on function public\.merge_anonymous_user_data\(uuid, uuid\) to service_role/);
   assert.match(mergeMigration, /users\.is_anonymous is true/);
@@ -155,4 +158,5 @@ test('migration enforces authenticated reads and owner writes', () => {
   assert.match(migration, /events_creator_client_key unique \(creator_id, client_event_id\)/);
   assert.match(migration, /add column if not exists updated_at timestamptz not null default now\(\)/);
   assert.match(migration, /storage\.foldername\(name\)\)\[1\] = auth\.uid\(\)::text/);
+  assert.doesNotMatch(migration, /pg_get_serial_sequence\('public\.midway_post_reactions', 'id'\)/);
 });
