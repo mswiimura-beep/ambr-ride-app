@@ -62,6 +62,15 @@ test('Supabase errors are preserved', () => {
 });
 
 test('event update and delete request returned ids and verify ownership', () => {
+  assert.doesNotMatch(
+    html.match(/async function refreshEvents[\s\S]*?function participantDisplayName/)?.[0] || '',
+    /client_event_id/,
+    'event reads must remain compatible with the current production schema'
+  );
+  assert.match(
+    html,
+    /insert\(\{\.\.\.payload,creator_id:user\.id\}\)\.select\('id'\)\.maybeSingle\(\)/
+  );
   assert.match(
     html,
     /update\(payload\)\.eq\('id',existing\.id\)\.eq\('creator_id',user\.id\)\.select\('id'\)\.maybeSingle\(\)/
