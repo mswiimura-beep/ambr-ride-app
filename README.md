@@ -12,6 +12,8 @@
 - `supabase/functions/google-maps-to-gpx/` — Googleマップ共有リンクを予定ルートGPXへ変換するEdge Function
 - `supabase/migrations/20260825000100_require_permanent_community_writers.sql` — 「みんなの投稿」の匿名書き込みを拒否する未適用のRLS／Storage案
 - `tests/` — GPX導線、共有地図、Google短縮URLと始点・終点検査のローカルテスト
+- `supabase/schema_audit_events.sql` — イベント関連テーブル・RLS・権限の読み取り専用監査
+- `tests/event-write-results.test.mjs` — 更新・削除が0件のとき成功扱いしない回帰テスト
 - `README.md` — この管理用メモ
 
 アプリは1ページ構成で、GitHub Pagesから公開しています。投稿、写真、イベント、参加・合流予定の共有にはSupabaseを使用します。Googleマップの短縮URL展開とGPX変換にはSupabase Edge Function、道路ルートの再計算にはOSRMを使用します。現在地周辺の天気にはOpen-Meteoを使用し、位置情報は天気取得にだけ利用して保存しません。名前とアイコン、完走記録は利用者の端末内に保存され、完走記録へ連動した元のGPXファイルはIndexedDBに保存されます。
