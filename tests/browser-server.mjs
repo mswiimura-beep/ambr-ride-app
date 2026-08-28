@@ -14,7 +14,8 @@ const html = source
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase[^>]+><\/script>/, mock);
 
 const server = createServer((request, response) => {
-  if (request.url === '/' || request.url?.startsWith('/index.html')) {
+  const pathname = new URL(request.url || '/', 'http://127.0.0.1').pathname;
+  if (pathname === '/' || pathname === '/index.html') {
     response.writeHead(200, {'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store'});
     response.end(html);
     return;

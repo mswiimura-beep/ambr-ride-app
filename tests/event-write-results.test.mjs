@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const migration = await readFile(
-  new URL('../supabase/migrations/20260825000100_event_ownership_rls.sql', import.meta.url),
+  new URL('../supabase/migrations/20260825000100_anonymous_owner_merge.sql', import.meta.url),
   'utf8'
 );
 
@@ -90,10 +90,10 @@ test('event deletion reports success only when a row is returned', async () => {
   assert.deepEqual(state.toasts, ['イベントを削除しました']);
 });
 
-test('event RLS proposal limits writes to each authenticated owner', () => {
-  assert.match(migration, /ambr_events_update[\s\S]+creator_id = auth\.uid\(\)/);
-  assert.match(migration, /ambr_events_delete[\s\S]+creator_id = auth\.uid\(\)/);
-  assert.match(migration, /ambr_participants_update[\s\S]+user_id = auth\.uid\(\)/);
-  assert.match(migration, /ambr_participants_delete[\s\S]+user_id = auth\.uid\(\)/);
-  assert.match(migration, /revoke all[\s\S]+from anon/);
+test('integrated RLS chain limits writes to each active owner', () => {
+  assert.match(migration, /ambr_events_update[\s\S]+creator_id = auth\.uid\(\)[\s\S]+ambr_owner_active\(auth\.uid\(\)\)/);
+  assert.match(migration, /ambr_events_delete[\s\S]+creator_id = auth\.uid\(\)[\s\S]+ambr_owner_active\(auth\.uid\(\)\)/);
+  assert.match(migration, /ambr_participants_update[\s\S]+user_id = auth\.uid\(\)[\s\S]+ambr_owner_active\(auth\.uid\(\)\)/);
+  assert.match(migration, /ambr_participants_delete[\s\S]+user_id = auth\.uid\(\)[\s\S]+ambr_owner_active\(auth\.uid\(\)\)/);
+  assert.match(migration, /revoke all on function public\.ambr_owner_active/);
 });

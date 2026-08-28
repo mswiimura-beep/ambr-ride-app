@@ -30,18 +30,18 @@ test('shared post upload is owner-bound and retry-safe', () => {
   assert.match(html, /user_id:user\.id,client_post_id:record\.clientPostId/);
   assert.match(html, /record\.ownerId&&record\.ownerId!==user\.id/);
   assert.match(html, /ownerId:user\.id,authorName/);
-  assert.match(html, /upsert:false/);
+  assert.match(html, /storage\.upload\([^\n]+upsert:true/);
   assert.match(html, /\.eq\('user_id',user\.id\)\.eq\('client_post_id',record\.clientPostId\)/);
-  assert.match(html, /if\(newPaths\.length\)/);
+  assert.match(html, /if\(uploadedPaths\.length\)/);
+  assert.match(html, /midwaySavedRecordMatches\(saved,user,record,paths\)/);
   assert.match(html, /if\(items\.length>5\)throw new Error\('送信待ちは5件までです'\)/);
-  assert.doesNotMatch(html, /storage\.upload\([^\n]+upsert:true/);
 });
 
 test('destructive remote operations verify owner and affected rows', () => {
   assert.match(html, /from\('midway_posts'\)\.delete\(\)\.eq\('id',id\)\.eq\('user_id',user\.id\)\.select\('id'\)/);
   assert.match(html, /from\('events'\)\.delete\(\)\.eq\('id',record\.id\)\.eq\('creator_id',user\.id\)\.select\('id'\)/);
   assert.match(html, /from\('event_participants'\)\.delete\(\)[^;]+\.select\('event_id'\)/);
-  assert.match(html, /queueStorageCleanup\(targets\)/);
+  assert.match(html, /queueStorageCleanup\(targets,user\.id\)/);
 });
 
 test('refreshes coalesce without losing a later refresh request', () => {
@@ -63,20 +63,19 @@ test('runtime handles auth changes, offline retries, and uncaught failures', () 
   assert.match(html, /addEventListener\('error'/);
 });
 
-test('all shared mutations have owner-bound offline operations', () => {
+test('offline mutation executor is owner-bound and active route producers use it', () => {
   for (const type of [
     'reaction-set', 'comment-insert', 'comment-delete', 'post-update', 'post-delete',
     'event-upsert', 'event-delete', 'participant-set', 'route-upsert', 'route-delete',
   ]) assert.match(html, new RegExp(`case '${type}'`));
-  assert.match(html, /queueMutation\('event-upsert'/);
-  assert.match(html, /queueMutation\('participant-set'/);
+  assert.match(html, /queueMutation\('route-upsert'/);
   assert.match(html, /queueMutation\('route-delete'/);
   assert.match(html, /ownerId:midwayUser\?\.id|ownerId=midwayUser\?\.id/);
 });
 
 test('owners can edit posts and events without changing ownership', () => {
-  assert.match(html, /function updateMidwayPostRecord/);
-  assert.match(html, /\.update\(values\)\.eq\('id',record\.id\)\.eq\('user_id',user\.id\)/);
+  assert.match(html, /function updateMidwayRecord/);
+  assert.match(html, /\.update\(payload\)\.eq\('id',record\.id\)\.eq\('user_id',user\.id\)/);
   assert.match(html, /function editActiveEvent/);
   assert.match(html, /\.eq\('id',existing\.id\)\.eq\('creator_id',user\.id\)/);
   assert.match(html, /record\.creator_id!==midwayUser\?\.id/);

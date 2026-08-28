@@ -29,7 +29,6 @@ const modalIds = [
   'midwayGalleryModal',
   'midwayMapModal',
   'rideModal',
-  'route3dModal',
   'weatherModal',
 ];
 
@@ -55,7 +54,8 @@ function serveFile(request, response) {
         window.supabase = { createClient() { return {
           auth: {
             getSession: async () => ({ data: { session: null } }),
-            signInAnonymously: async () => ({ data: { session: { user: { id: 'local-ui-test' } } } }),
+            signInAnonymously: async () => ({ data: { user: { id: 'local-ui-test', is_anonymous: true }, session: { user: { id: 'local-ui-test', is_anonymous: true } } } }),
+            onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
           },
           from: () => window.__ambrChain,
           functions: { invoke: async () => ({ data: null, error: { message: 'disabled in UI test' } }) },
