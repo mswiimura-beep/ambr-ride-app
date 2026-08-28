@@ -247,6 +247,32 @@ async function run() {
     assert.ok(form.top >= 0 && form.bottom <= 420, 'form modal does not fit keyboard-height viewport');
     assert.equal(form.documentWidth, 375, 'form modal causes horizontal overflow');
     assert.ok(form.minFontSize >= 16, 'form field can trigger iPhone input zoom');
+    await page.locator('#rideSaveButton').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(80);
+    const routeSaveActions = await page.evaluate(() => {
+      window.updateRideFormSaveActions({ hasGpx: true });
+      return ['rideSaveButton', 'rideSaveAndShareButton'].map((id) => {
+        const button = document.getElementById(id);
+        const rect = button.getBoundingClientRect();
+        const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return {
+          id,
+          text: button.textContent.trim(),
+          hidden: button.hidden,
+          width: rect.width,
+          height: rect.height,
+          hit: target === button || button.contains(target),
+        };
+      });
+    });
+    assert.match(routeSaveActions[0].text, /自分の記録に保存/, 'local route save action is unclear');
+    assert.match(routeSaveActions[1].text, /保存して共有を更新|保存して、みんなにも共有/, 'one-step share action is unclear');
+    routeSaveActions.forEach((button) => {
+      assert.equal(button.hidden, false, `${button.id}: route save action is hidden`);
+      assert.ok(button.width >= 44 && button.height >= 44, `${button.id}: route save action is below 44px`);
+      assert.equal(button.hit, true, `${button.id}: route save action center is covered`);
+    });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 375, 'route save actions cause horizontal overflow');
     await page.locator('#rideFormModal .entry-cancel').press('Tab');
     assert.equal(await page.evaluate(() => document.getElementById('rideFormModal').contains(document.activeElement)), true, 'Tab escaped the open modal');
 

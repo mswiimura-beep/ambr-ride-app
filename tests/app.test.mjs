@@ -18,6 +18,15 @@ test('GPX import and export controls are visible user actions', () => {
   assert.match(html, /id="rideModalGpxExport"[^>]*onclick="exportActiveRideGpx\(\)"/);
 });
 
+test('route records can be saved locally or saved and shared in one step', () => {
+  assert.match(html, /id="rideSaveButton"[^>]*onclick="saveRidePost\(false\)"[^>]*>自分の記録に保存する/);
+  assert.match(html, /id="rideSaveAndShareButton"[^>]*onclick="saveRidePost\(true\)"[^>]*>保存して、みんなにも共有/);
+  assert.match(html, /async function saveRidePost\(shareAfterSave=false\)/);
+  assert.match(html, /pendingRideShareAfterProfile=true;openProfileSetup\(\)/);
+  assert.match(html, /setTimeout\(\(\)=>saveRidePost\(true\),0\)/);
+  assert.match(guide, /「自分の記録に保存する」か「保存して、みんなにも共有」/);
+});
+
 test('removed route-comparison features stay removed', () => {
   for (const removed of ['比べるルート', 'どの道をよく使う', 'まだ走っていない道', 'routeComparison', 'trailStats']) {
     assert.equal(html.includes(removed), false, `${removed} must not be present`);
