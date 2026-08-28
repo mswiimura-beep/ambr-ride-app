@@ -40,6 +40,17 @@ test('retired next-destination voting and challenge features stay removed', () =
   assert.match(html, /id="wantBtn"[^>]*>予定ルート/);
 });
 
+test('menu prioritizes the four real touring actions', () => {
+  for (const action of ['予定・集合を作る', '参加・途中合流', 'Googleマップルート', 'ツーリングを記録']) {
+    assert.ok(html.includes(action), `${action} should be visible in the main menu`);
+  }
+  assert.match(html, /onclick="openEventForm\(\)"[^>]*><span class="menu-stage">走る前/);
+  assert.match(html, /onclick="openAppView\('eventsView'\)"[^>]*><span class="menu-stage">参加するとき/);
+  assert.match(html, /onclick="openAppView\('ridesView'\)"[^>]*><span class="menu-stage">ルート準備/);
+  assert.match(html, /onclick="openRideForm\(\)"[^>]*><span class="menu-stage">走った後/);
+  assert.match(guide, /「予定・集合を作る」「参加・途中合流」「Googleマップルート」「ツーリングを記録」/);
+});
+
 test('retired 3D playback and video dependencies stay removed', () => {
   for (const removed of ['maplibre-gl', 'route3d', '3D再生', '動画を保存', 'MediaRecorder']) {
     assert.equal(html.includes(removed), false, `${removed} must not be present`);

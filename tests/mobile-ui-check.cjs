@@ -226,6 +226,29 @@ async function run() {
     await page.locator('.brand-button').click();
     assert.equal(await page.locator('.view.active').getAttribute('id'), 'menuView', 'header did not return to menu');
 
+    const coreMenuActions = [
+      { name: /予定・集合を作る/, modal: 'eventFormModal' },
+      { name: /参加・途中合流/, view: 'eventsView' },
+      { name: /Googleマップルート/, view: 'ridesView' },
+      { name: /ツーリングを記録/, modal: 'rideFormModal' },
+    ];
+    for (const action of coreMenuActions) {
+      const button = page.getByRole('button', { name: action.name });
+      await button.scrollIntoViewIfNeeded();
+      const box = await button.boundingBox();
+      assert.ok(box && box.width >= 44 && box.height >= 44, `${action.name}: core menu action is below 44px`);
+      await button.click();
+      if (action.modal) {
+        assert.equal(await page.locator(`#${action.modal}`).getAttribute('aria-hidden'), 'false', `${action.name}: modal did not open`);
+        await page.locator(`#${action.modal} .entry-cancel`).click();
+        await page.waitForTimeout(80);
+      } else {
+        assert.equal(await page.locator('.view.active').getAttribute('id'), action.view, `${action.name}: view did not open`);
+        await page.locator('.back-menu').click();
+      }
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 375, `${action.name}: core action caused horizontal overflow`);
+    }
+
     await page.locator('#headerAvatar').click();
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'profileNameInput', 'profile modal did not focus its form');
     assert.equal(await page.locator('.app').getAttribute('inert'), '', 'background is not inert while modal is open');
