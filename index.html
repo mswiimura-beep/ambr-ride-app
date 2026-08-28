@@ -103,7 +103,7 @@
         <button class="menu-primary" type="button" onclick="openMidwayPostForm()"><span>📷</span><span><b>みんなと共有</b><small>場所・写真・コメントを仲間に送る</small></span></button>
         <div class="menu-grid">
           <button class="menu-card" type="button" onclick="openAppView('mapView')"><span class="menu-icon">⌖</span><b>自分の走行マップ</b><small>自分が保存したGPXを地図で確認</small></button>
-          <button class="menu-card" type="button" onclick="openAppView('trailsView')"><span class="menu-icon">〽</span><b>みんな＋自分の軌跡</b><small>仲間と自分のルート・走行方向を比較</small></button>
+          <button class="menu-card" type="button" onclick="openAppView('trailsView')"><span class="menu-icon">〽</span><b>みんな＋自分の軌跡</b><small>仲間と自分のルート・走行方向を確認</small></button>
           <button class="menu-card" type="button" onclick="openAppView('ridesView')"><span class="menu-icon">🏍</span><b>ツーリング記録</b><small>完走後の記録を端末に保存</small></button>
           <button class="menu-card" type="button" onclick="openAppView('feedView')"><span class="menu-icon">▦</span><b>みんなの投稿</b><small><span id="sharedPostCount">0件</span>の投稿</small></button>
           <button class="menu-card wide" type="button" onclick="openAppView('eventsView')"><span class="menu-icon">📅</span><b>イベントカレンダー</b><small>開催日・参加者・集合場所の地図をみんなで共有</small></button>
@@ -132,7 +132,7 @@
       <div class="trails-hero">
         <div class="eyebrow">AMBR ROUTE ARCHIVE</div>
         <h2>みんな＋自分の軌跡</h2>
-        <p>仲間の登録ルートに自分の保存GPXも重ね、どこを、どちら向きに走ったか比べます。</p>
+        <p>仲間の登録ルートに自分の保存GPXも重ね、どこを、どちら向きに走ったか確認できます。</p>
         <div class="gpx-actions"><button id="playTrailsBtn" class="play-all" onclick="toggleTrailPlayback()">▶ 光を流す</button></div>
       </div>
       <div class="section" style="padding-top:0">
@@ -383,7 +383,7 @@
   }
   function initTrailsMap(){
     if(trailsMap)return true;if(!window.L){showMapUnavailable('trailsMapStatus');return false}
-    try{trailsMap=L.map('trailsMap',{zoomControl:false,attributionControl:true}).setView([41.02,140.48],9);
+    try{trailsMap=L.map('trailsMap',{zoomControl:false,attributionControl:true}).setView([40.87,140.74],8);
       L.control.zoom({position:'bottomright'}).addTo(trailsMap);
       addResilientTiles(trailsMap,'trailsMapStatus');
       uploadedTrailGroup=L.layerGroup().addTo(trailsMap);trailFlowGroup=L.layerGroup().addTo(trailsMap);
