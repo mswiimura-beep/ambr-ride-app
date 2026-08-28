@@ -33,6 +33,13 @@ test('removed route-comparison features stay removed', () => {
   }
 });
 
+test('retired next-destination voting and challenge features stay removed', () => {
+  for (const removed of ['planView', '次の目標・行き先', '候補を追加', '道の駅制覇', 'function vote(', 'wantRoutes']) {
+    assert.equal(html.includes(removed), false, `${removed} must not be present`);
+  }
+  assert.match(html, /id="wantBtn"[^>]*>予定ルート/);
+});
+
 test('retired 3D playback and video dependencies stay removed', () => {
   for (const removed of ['maplibre-gl', 'route3d', '3D再生', '動画を保存', 'MediaRecorder']) {
     assert.equal(html.includes(removed), false, `${removed} must not be present`);
