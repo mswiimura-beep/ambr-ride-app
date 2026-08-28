@@ -31,7 +31,7 @@ assert.match(guide, /自分の投稿に.*「編集」と「削除」/, '説明�
 const permanentUserHelper = inlineScript.match(/function isPermanentMidwayUser\(user\)\{[^}]+\}/)?.[0];
 assert.ok(permanentUserHelper, '恒久ログイン判定を取得できる');
 const isPermanentMidwayUser = new Function(`${permanentUserHelper}; return isPermanentMidwayUser;`)();
-assert.equal(isPermanentMidwayUser({ is_anonymous: true }), false, '匿名Auth利用者は見る専として拒否する');
+assert.equal(isPermanentMidwayUser({ is_anonymous: true }), false, '本人確認前の匿名Auth利用者は書き込みを拒否する');
 assert.equal(isPermanentMidwayUser({ is_anonymous: false }), true, '匿名でないAuth利用者は投稿可能と判定する');
 assert.equal(isPermanentMidwayUser({}), false, '匿名属性がない場合も安全側に拒否する');
 assert.match(html, /async function sendMidwayRecord\(record\)\{\s*const user=await ensureMidwayWriteSession\(\)/, '新規投稿と再送の共通経路で参加者ログインを検査する');
@@ -41,7 +41,12 @@ assert.match(html, /toggleMidwayReaction[\s\S]*?ensureMidwayWriteSession\(\)/, '
 assert.match(html, /submitMidwayComment[\s\S]*?ensureMidwayWriteSession\(\)/, 'コメント送信で参加者ログインを検査する');
 assert.match(html, /deleteMidwayComment[\s\S]*?ensureMidwayWriteSession\(\)/, 'コメント削除で参加者ログインを検査する');
 assert.match(html, /catch\(e\)\{if\(isMidwayWriteAuthError\(e\)\)\{[^}]+return\}try\{queueMidwayRecord/, '認証拒否を通信障害として送信待ちに保存しない');
-assert.match(html, /textarea\.disabled=!canWrite/, '見る専のコメント入力欄を無効にする');
+assert.match(html, /textarea\.disabled=!canWrite/, '本人確認前のコメント入力欄を無効にする');
+assert.match(html, /function requestParticipantLogin\(action='投稿'\)/, '本人確認前の操作からログイン画面へ案内する');
+assert.match(html, /openMidwayPostForm[\s\S]*?requestParticipantLogin\(record\?'投稿を編集':'写真を投稿'\)/, '投稿操作から本人確認を開始できる');
+assert.match(html, /requestParticipantLogin\('リアクション'\)/, 'リアクション操作から本人確認を開始できる');
+assert.match(html, /requestParticipantLogin\('コメント'\)/, 'コメント操作から本人確認を開始できる');
+assert.doesNotMatch(html, /見る専/, '利用者を誤って見る専と決めつけない');
 
 assert.equal((permanentWriterMigration.match(/as restrictive/g) || []).length, 10, '投稿・反応・コメント・写真の全変更操作にrestrictive policyを置く');
 assert.match(permanentWriterMigration, /public\.midway_posts[\s\S]*?is_anonymous/, '投稿RLSで匿名Authを拒否する');

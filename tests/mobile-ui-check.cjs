@@ -46,6 +46,7 @@ function serveFile(request, response) {
       const supabaseStub = `
         window.L = undefined;
         window.maplibregl = undefined;
+        window.turnstile = { render(container, options) { queueMicrotask(() => options.callback('ui-test-token')); return 1; }, remove() {} };
         window.__ambrResult = { data: [], error: null };
         window.__ambrChain = new Proxy({}, { get(target, property) {
           if (property === 'then') return (resolve) => resolve(window.__ambrResult);
@@ -168,6 +169,7 @@ async function run() {
   const executablePath = browserCandidates.find((candidate) => fsSync.existsSync(candidate));
   const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   const page = await browser.newPage();
+  page.on('pageerror', (error) => console.error('browser page error:', error.message));
   page.setDefaultTimeout(10000);
   await page.route('https://**/*', (route) => route.abort());
   const results = [];
@@ -258,6 +260,15 @@ async function run() {
       }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 375, `${action.name}: core action caused horizontal overflow`);
     }
+
+    await page.getByRole('button', { name: /写真・場所を仲間に送る/ }).click();
+    await page.waitForTimeout(180);
+    assert.equal(await page.locator('#profileModal').getAttribute('aria-hidden'), 'false', 'posting before verification did not open the verification flow');
+    assert.equal(await page.locator('#profileModalTitle').textContent(), '写真を投稿できるようにする', 'verification flow does not explain the requested action');
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'ownershipEmailInput', 'verification flow did not focus the email field');
+    assert.equal(await page.locator('#midwayPostModal').getAttribute('aria-hidden'), 'true', 'post form opened before verification');
+    await page.locator('#profileModal .profile-cancel').click();
+    await page.waitForTimeout(80);
 
     await page.locator('#headerAvatar').click();
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'profileNameInput', 'profile modal did not focus its form');
