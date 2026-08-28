@@ -51,6 +51,21 @@ test('menu prioritizes the four real touring actions', () => {
   assert.match(guide, /「予定・集合を作る」「参加・途中合流」「Googleマップルート」「ツーリングを記録」/);
 });
 
+test('event setup uses free Google Maps links without route recalculation or a large map', () => {
+  assert.match(html, /id="eventLocationInput"[^>]*placeholder="例：函館フェリーターミナル"/);
+  assert.match(html, /onclick="openEventLocationGoogleMaps\(\)"[^>]*>🗺 Googleマップで集合場所を確認/);
+  assert.match(html, /maps\/search\/\?api=1&query='\+encodeURIComponent\(query\)/);
+  assert.match(html, /id="eventRouteUrlInput"[^>]*oninput="updateEventRouteState\(\)"/);
+  assert.match(html, /route_url:routeUrl\|\|null/);
+  assert.match(html, /latitude:pendingEventLocation\?\.latitude\?\?null/);
+  assert.match(html, /hasRoute=!!record\.route_url/);
+  assert.doesNotMatch(html, /id="eventFormMap"/);
+  assert.doesNotMatch(html, /id="eventDetailMap"/);
+  assert.doesNotMatch(html, /id="eventRouteButton"/);
+  assert.doesNotMatch(html, /function prepareEventGoogleRoute/);
+  assert.match(guide, /リンクは変換せず、そのまま仲間に共有されます/);
+});
+
 test('retired 3D playback and video dependencies stay removed', () => {
   for (const removed of ['maplibre-gl', 'route3d', '3D再生', '動画を保存', 'MediaRecorder']) {
     assert.equal(html.includes(removed), false, `${removed} must not be present`);

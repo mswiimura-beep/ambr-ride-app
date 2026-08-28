@@ -240,6 +240,16 @@ async function run() {
       await button.click();
       if (action.modal) {
         assert.equal(await page.locator(`#${action.modal}`).getAttribute('aria-hidden'), 'false', `${action.name}: modal did not open`);
+        if (action.modal === 'eventFormModal') {
+          await page.locator('#eventLocationInput').fill('函館フェリーターミナル');
+          assert.equal(await page.locator('#eventFormMap').count(), 0, 'event form still contains the large Leaflet map');
+          assert.equal(await page.locator('#eventRouteButton').count(), 0, 'event form still asks users to recalculate the route');
+          const googleButton = page.getByRole('button', { name: /Googleマップで集合場所を確認/ });
+          const googleBox = await googleButton.boundingBox();
+          assert.ok(googleBox && googleBox.width >= 44 && googleBox.height >= 44, 'Google Maps location action is below 44px');
+          const routeInputBox = await page.locator('#eventRouteUrlInput').boundingBox();
+          assert.ok(routeInputBox && routeInputBox.width >= 44 && routeInputBox.height >= 44, 'Google Maps route link input is below 44px');
+        }
         await page.locator(`#${action.modal} .entry-cancel`).click();
         await page.waitForTimeout(80);
       } else {
