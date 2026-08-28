@@ -41,14 +41,14 @@ test('retired next-destination voting and challenge features stay removed', () =
 });
 
 test('menu prioritizes the four real touring actions', () => {
-  for (const action of ['予定・集合を作る', '参加・途中合流', 'Googleマップルート', 'ツーリングを記録']) {
+  for (const action of ['イベントを作成', 'イベントを見る', 'Googleマップルート', 'ツーリングを記録']) {
     assert.ok(html.includes(action), `${action} should be visible in the main menu`);
   }
   assert.match(html, /onclick="openEventForm\(\)"[^>]*><span class="menu-stage">走る前/);
   assert.match(html, /onclick="openAppView\('eventsView'\)"[^>]*><span class="menu-stage">参加するとき/);
   assert.match(html, /onclick="openAppView\('ridesView'\)"[^>]*><span class="menu-stage">ルート準備/);
   assert.match(html, /onclick="openRideForm\(\)"[^>]*><span class="menu-stage">走った後/);
-  assert.match(guide, /「予定・集合を作る」「参加・途中合流」「Googleマップルート」「ツーリングを記録」/);
+  assert.match(guide, /「イベントを作成」「イベントを見る」「Googleマップルート」「ツーリングを記録」/);
 });
 
 test('event setup uses free Google Maps links without route recalculation or a large map', () => {

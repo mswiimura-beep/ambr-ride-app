@@ -227,8 +227,8 @@ async function run() {
     assert.equal(await page.locator('.view.active').getAttribute('id'), 'menuView', 'header did not return to menu');
 
     const coreMenuActions = [
-      { name: /予定・集合を作る/, modal: 'eventFormModal' },
-      { name: /参加・途中合流/, view: 'eventsView' },
+      { name: /イベントを作成/, modal: 'eventFormModal' },
+      { name: /イベントを見る/, view: 'eventsView' },
       { name: /Googleマップルート/, view: 'ridesView' },
       { name: /ツーリングを記録/, modal: 'rideFormModal' },
     ];
