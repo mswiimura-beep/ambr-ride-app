@@ -212,6 +212,15 @@ async function run() {
       results.push({ viewport, entry: entry.entry, navigation: navigation.buttons });
     }
 
+    console.log('checking entry with iPhone safe-area insets');
+    await page.setViewportSize({ width: 375, height: 320 });
+    await page.goto(`${baseUrl}/?safe-area=1`, { waitUntil: 'domcontentloaded' });
+    await page.addStyleTag({ content: ':root { --safe-top: 59px; --safe-bottom: 34px; }' });
+    const safeAreaEntry = await metrics(page);
+    assert.equal(safeAreaEntry.entry.hit, true, 'safe-area: entry center is covered');
+    assert.ok(safeAreaEntry.entry.top >= 0 && safeAreaEntry.entry.bottom <= safeAreaEntry.viewport[1], 'safe-area: entry is outside viewport');
+    assert.ok(safeAreaEntry.entry.height >= 44, 'safe-area: entry is below 44px');
+
     await page.setViewportSize({ width: 375, height: 500 });
     console.log('checking navigation and modal behavior');
     await page.goto(`${baseUrl}/?interaction=1`, { waitUntil: 'domcontentloaded' });
@@ -221,6 +230,27 @@ async function run() {
       await page.locator(`nav button[data-view="${view}"]`).click();
       assert.equal(await page.locator('.view.active').getAttribute('id'), view, `${view}: navigation did not activate view`);
     }
+    await page.locator('nav button[data-view="feedView"]').click();
+    console.log('checking device-only post favorites');
+    await page.waitForTimeout(250);
+    await page.evaluate(() => {
+      localStorage.removeItem('ambr-favorite-midway-posts-v1');
+      midwayRemotePosts = [
+        { id: 'favorite-a', author_name: 'A', place_name: '青森駅', comment: '駅前', created_at: '2026-10-18T00:00:00Z', reactions: [], comments: [], signedUrls: [] },
+        { id: 'favorite-b', author_name: 'B', place_name: '八甲田', comment: '山道', created_at: '2026-10-17T00:00:00Z', reactions: [], comments: [], signedUrls: [] },
+      ];
+      renderMidwayPosts();
+    });
+    await page.getByRole('button', { name: 'この端末に保存' }).first().click();
+    assert.equal(await page.locator('#midwayPostList .favorite-post').first().getAttribute('aria-pressed'), 'true', 'favorite state is announced on the card');
+    assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ambr-favorite-midway-posts-v1'))), ['favorite-a'], 'favorite is stored only in local storage');
+    await page.locator('#favoritePostsToggle').click();
+    assert.equal(await page.locator('#midwayPostList .feed-card').count(), 1, 'favorites filter hides unbookmarked posts');
+    assert.match(await page.locator('#midwayPostList').innerText(), /青森駅/);
+    assert.doesNotMatch(await page.locator('#midwayPostList').innerText(), /八甲田/);
+    await page.locator('#midwayPostList .favorite-post').click();
+    assert.equal(await page.locator('#midwayPostList .feed-card').count(), 0, 'removing the last favorite returns the empty state');
+    assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ambr-favorite-midway-posts-v1'))), [], 'unfavoriting updates only local storage');
     await page.locator('nav button[data-view="ridesView"]').click();
     await page.locator('.back-menu').click();
     assert.equal(await page.locator('.view.active').getAttribute('id'), 'menuView', 'toolbar did not return to menu');
