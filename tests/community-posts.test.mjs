@@ -26,6 +26,9 @@ assert.match(html, /fetchPlaceCandidates\(query,controller\.signal\)/, '地名�
 assert.match(html, /place\+'をGoogleマップで開く/, '施設名を示した地図リンクを作る');
 assert.match(html, /midwayReactionTypes=.*いいね.*いい写真.*行ってみたい/, '3種類のリアクションを提供する');
 assert.match(html, /midway_post_comments/, '投稿コメントをSupabaseと同期する');
+assert.match(html, /FAVORITE_POSTS_KEY='ambr-favorite-midway-posts-v1'/, 'お気に入りに専用の端末内保存キーを使う');
+assert.match(html, /function toggleMidwayPostFavorite\(postId\)[\s\S]*?localStorage\.setItem\(FAVORITE_POSTS_KEY/, 'お気に入りはSupabaseへ送らず端末内へ保存する');
+assert.match(html, /function toggleFavoritePostFilter\(\)/, 'お気に入りだけを表示する切り替えを提供する');
 assert.match(guide, /自分の投稿に.*「編集」と「削除」/, '説明書に投稿編集・削除を記載する');
 
 const permanentUserHelper = inlineScript.match(/function isPermanentMidwayUser\(user\)\{[^}]+\}/)?.[0];
